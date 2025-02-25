@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1017397404969",
+    "project_id": "expedientesems",
+    "storage_bucket": "expedientesems.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1017397404969:android:f0ecb20e3271ffe65bc338",
+        "android_client_info": {
+          "package_name": "com.example.plataformacnbbbjo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWMtd4Is2-XKf1cF2gwAPWs_eYDOkSP7w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
