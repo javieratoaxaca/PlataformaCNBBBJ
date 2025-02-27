@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -155,7 +157,7 @@ class FirebaseService {
     try {
       ListResult coursesList = await _storage
           .ref(
-              '2024/CAPACITACIONES_LISTA_ASISTENCIA_PAPEL_SARES/Cursos_2024/$trimester/$dependency/$courseName')
+              '2025/CAPACITACIONES_LISTA_ASISTENCIA_PAPEL_SARES/Cursos_2025/$trimester/$dependency/$courseName')
           .listAll();
 
       Map<String, String> files = {};
@@ -221,4 +223,24 @@ class FirebaseService {
       rethrow;
     }
   }
+ 
+
+  
+  Future<void> descargarZIP() async {
+  final uri = Uri.parse("https://us-central1-expedientesems.cloudfunctions.net/generarZipDocumentos");
+  
+  try {
+    final response = await http.get(uri);
+    
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final downloadUrl = data["downloadUrl"];
+      print("Descarga aquí: $downloadUrl");
+    } else {
+      print("Error en la descarga: ${response.statusCode}");
+    }
+  } catch (e) {
+    print("Error en la solicitud: $e");
+  }
+}
 }

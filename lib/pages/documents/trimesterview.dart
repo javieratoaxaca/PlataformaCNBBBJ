@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:plataformacnbbbjo/dataConst/constand.dart';
 import 'package:plataformacnbbbjo/pages/documents/dependenciesview.dart';
 import 'package:plataformacnbbbjo/pages/documents/firebaseservice.dart';
 
-
 class TrimesterView extends StatefulWidget {
-  const TrimesterView({Key? key}) : super(key: key);
+  const TrimesterView({super.key});
 
   @override
   State<TrimesterView> createState() => _TrimesterViewState();
@@ -26,6 +26,7 @@ class _TrimesterViewState extends State<TrimesterView> {
     setState(() => isLoading = false);
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,16 +38,16 @@ class _TrimesterViewState extends State<TrimesterView> {
                   padding: const EdgeInsets.all(16.0),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      int crossAxisCount = 1; // Default: 1 columna
-                      double aspectRatio = 1.5; // Relación de aspecto de las tarjetas
+                      int crossAxisCount = 1;
+                      double aspectRatio = 1.5;
 
                       if (constraints.maxWidth > 1200) {
-                        crossAxisCount = 2; // Escritorio grande
+                        crossAxisCount = 2;
                         aspectRatio = 2;
                       } else if (constraints.maxWidth > 800) {
-                        crossAxisCount = 2; // Pantallas medianas
+                        crossAxisCount = 2;
                         aspectRatio = 1.8;
-                      } 
+                      }
 
                       return GridView.builder(
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -109,6 +110,17 @@ class _TrimesterViewState extends State<TrimesterView> {
                     },
                   ),
                 ),
+      
+      /// Botón flotante para descargar todos los documentos
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: ()async{
+            await _firebaseService.descargarZIP();
+        },
+        
+        icon: const Icon(Icons.download),
+        label: const Text("Descargar Archivos"),
+        backgroundColor: greenColorLight,
+      ),
     );
   }
 }
