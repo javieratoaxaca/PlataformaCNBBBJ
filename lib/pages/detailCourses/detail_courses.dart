@@ -3,7 +3,7 @@ import 'package:plataformacnbbbjo/components/formPatrts/actions_form_check.dart'
 import 'package:plataformacnbbbjo/components/formPatrts/body_widgets.dart';
 import 'package:plataformacnbbbjo/pages/detailCourses/form_body_detail_courses.dart';
 import 'package:plataformacnbbbjo/providers/edit_provider.dart';
-import 'package:plataformacnbbbjo/service/detailCourseService/detailCourse_form_logic.dart';
+import 'package:plataformacnbbbjo/service/detailCourseService/detail_course_form_logic.dart';
 import 'package:plataformacnbbbjo/service/detailCourseService/service_detail_course.dart';
 import 'package:provider/provider.dart';
 

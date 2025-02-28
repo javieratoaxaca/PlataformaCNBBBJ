@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:plataformacnbbbjo/components/formPatrts/actions_form_check.dart';
 import 'package:plataformacnbbbjo/components/formPatrts/build_field.dart';
 import 'package:plataformacnbbbjo/components/formPatrts/ink_component.dart';
-import 'package:plataformacnbbbjo/components/sendEmail/body_card_detailCourse.dart';
+import 'package:plataformacnbbbjo/components/sendEmail/body_card_detail_course.dart';
 import 'package:plataformacnbbbjo/service/detailCourseService/service_send_email.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import '../../dataConst/constand.dart';

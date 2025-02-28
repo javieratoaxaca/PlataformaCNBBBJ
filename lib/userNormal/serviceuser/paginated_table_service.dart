@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 class PaginatedTableService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -9,9 +10,9 @@ class PaginatedTableService {
 
     try {
 
-      final _auth = FirebaseAuth.instance;
+      final auth = FirebaseAuth.instance;
 
-      String uid = _auth.currentUser?.uid ?? '';
+      String uid = auth.currentUser?.uid ?? '';
 
       QuerySnapshot cursosCompletadosSnapshot =
       await _firestore.collection('CursosCompletados').where('uid', isEqualTo: uid).get();
@@ -64,8 +65,12 @@ class PaginatedTableService {
       }
 
       return tempRows;
-    } catch (e) {
-      print("Error al obtener datos: $e");
+    } catch (e, stackTrace) {
+      await Sentry.captureException(e, stackTrace: stackTrace,
+      withScope: (scope) {
+        scope.setTag('Table employee', 'No data find');
+      } 
+      );
       return [];
     }
   }

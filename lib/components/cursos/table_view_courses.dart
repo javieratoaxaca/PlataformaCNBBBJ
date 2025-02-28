@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:plataformacnbbbjo/components/formPatrts/custom_snackbar.dart';
-import 'package:plataformacnbbbjo/components/table/MyPaginatedTable.dart';
+import 'package:plataformacnbbbjo/components/table/my_paginated_table.dart';
 import 'package:plataformacnbbbjo/dataConst/constand.dart';
 import 'package:plataformacnbbbjo/providers/edit_provider.dart';
 import 'package:plataformacnbbbjo/service/coursesService/database_courses.dart';

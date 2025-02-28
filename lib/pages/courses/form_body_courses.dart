@@ -9,7 +9,7 @@ import '../../util/responsive.dart';
   /// Estructura del formulario para añadir/editar cursos
   ///
   /// Este widget muestra diversos campos de entrada y controladores como [FirebaseDropdownController],
-  /// [TextEditingController], listas de valores (List<String>), entre otros
+  /// [TextEditingController], listas de valores, entre otros
   /// para registrar la información de un curso, como el nombre, dependencia, nomenclatura,
   /// trimestre, fechas de inicio, registro y envío de constancia, almacenando los valores
   /// capturados para añadir o editar un curso.

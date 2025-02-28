@@ -10,7 +10,7 @@ import '../../util/responsive.dart';
 /// Estructura del formulario para añadir/editar empleados
 ///
 /// Este widget muestra diversos campos de entrada y controladores como [FirebaseDropdownController],
-/// [TextEditingController], [FirebaseValueDropdownController], listas de valores (List<String>),
+/// [TextEditingController], [FirebaseValueDropdownController], listas de valores,
 /// entre otros para registrar la información de un empleado, como el nombre, email, puesto, area,
 /// sección, sare, ore y sexo, almacenando los valores capturados para añadir o editar un empleado.
 
@@ -68,6 +68,8 @@ class _FormBodyEmployeeState extends State<FormBodyEmployee> {
         return 'Enlace';
       case 'Jefatura':
         return 'Jefatura';
+      case 'Servidor':
+        return 'Servidor';
       case 'Subdireccion':
         return 'Subdireccion';
       case 'Titular':

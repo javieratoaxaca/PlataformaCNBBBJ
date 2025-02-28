@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:plataformacnbbbjo/components/table/MyPaginatedTable.dart';
+import 'package:plataformacnbbbjo/components/table/my_paginated_table.dart';
 import 'package:plataformacnbbbjo/providers/edit_provider.dart';
 import 'package:plataformacnbbbjo/service/employeeService/database_methods_employee.dart';
 import 'package:provider/provider.dart';
 import '../../dataConst/constand.dart';
 import '../formPatrts/custom_snackbar.dart';
-import 'assignCupoDialog.dart';
+import 'assign_cupo_dialog.dart';
 
 
 /// La clase `TableViewEmployee` en Flutter es un widget sin estado que muestra una tabla de empleados con

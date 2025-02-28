@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:plataformacnbbbjo/components/detailCourses/table_view_detailCourses.dart';
+import 'package:plataformacnbbbjo/components/detailCourses/table_view_detail_courses.dart';
 import 'package:plataformacnbbbjo/components/formPatrts/body_widgets.dart';
 import 'package:plataformacnbbbjo/components/table/header_search.dart';
 import 'package:plataformacnbbbjo/service/detailCourseService/database_detail_courses.dart';

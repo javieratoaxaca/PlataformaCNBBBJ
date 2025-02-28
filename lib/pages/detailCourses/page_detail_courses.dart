@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:plataformacnbbbjo/components/detailCourses/card_detailCourse.dart';
+import 'package:plataformacnbbbjo/components/detailCourses/card_detail_course.dart';
 import 'package:plataformacnbbbjo/pages/detailCourses/detail_courses.dart';
 import 'package:plataformacnbbbjo/providers/edit_provider.dart';
 import 'package:provider/provider.dart';

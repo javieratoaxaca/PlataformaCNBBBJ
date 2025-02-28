@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:plataformacnbbbjo/auth/auth_service.dart';
 import 'package:plataformacnbbbjo/components/formPatrts/custom_snackbar.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-
-
 import '../auth/login_or_register.dart';
 import '../dataConst/constand.dart';
 
@@ -37,7 +36,17 @@ Future<void> login(BuildContext context, String email, String password) async {
   }
   // Intentar login
   try {
+    await FirebaseAuth.instance.signOut();
     await authService.signInWithEmailPassword(email.trim(), password.trim());
+    await refreshUserClaims();
+
+// 🔹 Verificar que los claims se actualicen después del login
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final idTokenResult = await user.getIdTokenResult();
+      print("Claims después del login: ${idTokenResult.claims}");
+    }
+
   } catch (e) {
     if (context.mounted) {
       showCustomSnackBar(context, "Error $e", Colors.red);
@@ -143,3 +152,13 @@ Future<void> sendPasswordReset(BuildContext context, String email) async {
     );
   }
 }
+
+  //Funcion para refrescar los claims despues de que el usuario tenga la sesión iniciada
+Future<void> refreshUserClaims() async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    await user.getIdToken(true); // Forzar actualización del token
+    print("Claims actualizados: ${await user.getIdTokenResult()}");
+  }
+}
+

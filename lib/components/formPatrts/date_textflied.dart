@@ -11,6 +11,7 @@ class DateTextField extends StatefulWidget {
   const DateTextField({super.key, required this.controller});
 
   @override
+  // ignore: library_private_types_in_public_api
   _DateTextFieldState createState() => _DateTextFieldState();
 }
 

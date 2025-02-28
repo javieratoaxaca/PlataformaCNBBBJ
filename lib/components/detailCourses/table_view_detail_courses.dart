@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:plataformacnbbbjo/components/sendEmail/dialog_email.dart';
-import 'package:plataformacnbbbjo/components/table/MyPaginatedTable.dart';
+import 'package:plataformacnbbbjo/components/table/my_paginated_table.dart';
 import 'package:plataformacnbbbjo/service/detailCourseService/database_detail_courses.dart';
 import 'package:provider/provider.dart';
 import '../../dataConst/constand.dart';
