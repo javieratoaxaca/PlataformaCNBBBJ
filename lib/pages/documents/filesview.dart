@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:plataformacnbbbjo/pages/documents/firebaseservice.dart';
 
 
 class FilesListPage extends StatefulWidget {
-  final String courseName; // Renombrado a courseName
+  final String courseName; 
   final String dependency;
   final String trimester;
 
   const FilesListPage({
-    Key? key,
+    super.key,
     required this.courseName,
     required this.dependency,
     required this.trimester,
-  }) : super(key: key);
+  });
 
   @override
   State<FilesListPage> createState() => _FilesListPageState();

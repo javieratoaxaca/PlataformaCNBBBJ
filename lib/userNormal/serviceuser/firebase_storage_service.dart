@@ -29,6 +29,7 @@ class FirebaseStorageService {
     );
 
     if (result == null) {
+      if (!context.mounted) return;
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -43,7 +44,7 @@ class FirebaseStorageService {
     }
 
     String fileName = basename(result.files.single.name);
-    String storagePath = '2024/CAPACITACIONES_LISTA_ASISTENCIA_PAPEL_SARES/Cursos_2024/$trimester/$dependency/$course/';
+    String storagePath = '2025/CAPACITACIONES_LISTA_ASISTENCIA_PAPEL_SARES/Cursos_2025/$trimester/$dependency/$course/';
     if (subCourse != null) storagePath += '$subCourse/';
     storagePath += fileName;
 
@@ -62,6 +63,7 @@ class FirebaseStorageService {
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
+       if (!context.mounted) return;
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -82,6 +84,7 @@ class FirebaseStorageService {
 
       try {
         await storageRef.getDownloadURL();
+         if (!context.mounted) return;
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -100,6 +103,7 @@ class FirebaseStorageService {
         File file = File(result.files.single.path!);
         uploadTask = storageRef.putFile(file, metadata);
       } else {
+         if (!context.mounted) return;
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -136,7 +140,7 @@ class FirebaseStorageService {
         'statusUser':'activo',
         'mensajeAdmin': '',
       });
-
+       if (!context.mounted) return;
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -149,6 +153,7 @@ class FirebaseStorageService {
         ),
       );
     } catch (e) {
+       if (!context.mounted) return;
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
