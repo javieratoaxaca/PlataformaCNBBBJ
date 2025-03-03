@@ -36,6 +36,7 @@ Future<void> login(BuildContext context, String email, String password) async {
   }
   // Intentar login
   try {
+    // CERRAR SESIONES ANTERIORES Y REFRESCAR LOS CUSTOM CLAIMS
     await FirebaseAuth.instance.signOut();
     await authService.signInWithEmailPassword(email.trim(), password.trim());
     await refreshUserClaims();
@@ -43,8 +44,7 @@ Future<void> login(BuildContext context, String email, String password) async {
 // 🔹 Verificar que los claims se actualicen después del login
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      final idTokenResult = await user.getIdTokenResult();
-      print("Claims después del login: ${idTokenResult.claims}");
+      await user.getIdTokenResult();
     }
 
   } catch (e) {
@@ -56,23 +56,23 @@ Future<void> login(BuildContext context, String email, String password) async {
 
 /// La función `register` en Dart registra a un usuario con correo electrónico y contraseña, almacena su información
 /// en Firebase Firestore y maneja errores con mensajes de error personalizados y registro de Sentry.
-/// 
+///
 /// Argumentos:
 /// cupo (String): El parámetro `cupo` en la función `register` representa un identificador
 /// específico relacionado con el usuario. Se almacena en la base de datos de Firestore bajo el
-/// campo 'CUPO' para el documento de usuario. Es importante tener en cuenta que se recorta antes 
+/// campo 'CUPO' para el documento de usuario. Es importante tener en cuenta que se recorta antes
 /// de guardar para eliminar cualquier espacio al inicio o final.
 /// email (String): El parámetro `email` en la función `register` es una cadena que representa la
-/// dirección de correo electrónico del usuario que se está registrando. Se utiliza como parte del 
-/// proceso de registro del usuario para crear una nueva cuenta con la dirección de correo electrónico 
+/// dirección de correo electrónico del usuario que se está registrando. Se utiliza como parte del
+/// proceso de registro del usuario para crear una nueva cuenta con la dirección de correo electrónico
 /// proporcionada.
 /// password (String): El parámetro `password` en la función `register` es una cadena que representa
-/// la contraseña ingresada por el usuario durante el proceso de registro. Se utiliza para crear una 
+/// la contraseña ingresada por el usuario durante el proceso de registro. Se utiliza para crear una
 /// nueva cuenta de usuario con la dirección de correo electrónico proporcionada.
 /// confirmPassword (Cadena): El parámetro `confirmPassword` en la función `register` se utiliza para
-/// almacenar la contraseña confirmada ingresada por el usuario durante el proceso de registro. 
-/// Este parámetro se compara con el parámetro `password` para garantizar que el usuario haya ingresado 
-/// la misma contraseña correctamente dos veces antes de continuar con el registro. 
+/// almacenar la contraseña confirmada ingresada por el usuario durante el proceso de registro.
+/// Este parámetro se compara con el parámetro `password` para garantizar que el usuario haya ingresado
+/// la misma contraseña correctamente dos veces antes de continuar con el registro.
 /// Si las contraseñas no coinciden muestra un mensaje con la función `showCustomSnackBar`.
 Future<void> register(BuildContext context, String cupo, String email,
     String password, String confirmPassword) async {
@@ -81,7 +81,7 @@ Future<void> register(BuildContext context, String cupo, String email,
   if (password.trim() == confirmPassword.trim()) {
     try {
       final userCredential =
-          await authService.signUpWithEmailAndPassword(email, password);
+      await authService.signUpWithEmailAndPassword(email, password);
 
       String uid = userCredential.user!.uid;
 
@@ -107,19 +107,19 @@ Future<void> register(BuildContext context, String cupo, String email,
   }
 }
 
-/// La función `sendPasswordReset` en Dart envía un correo electrónico de restablecimiento de 
-/// contraseña a la dirección de correo electrónico proporcionada, manejando errores y mostrando 
+/// La función `sendPasswordReset` en Dart envía un correo electrónico de restablecimiento de
+/// contraseña a la dirección de correo electrónico proporcionada, manejando errores y mostrando
 /// mensajes apropiados.
-/// 
+///
 /// Argumentos:
 /// contexto (BuildContext): el parámetro `BuildContext` en la función `sendPasswordReset` se usa
-/// para proporcionar el contexto del widget actual en el árbol de widgets. Se usa normalmente para 
-/// mostrar elementos de la interfaz de usuario como SnackBars, diálogos o navegar a diferentes 
-/// pantallas. 
-/// Correo electrónico (String): el parámetro `email` en la función `sendPasswordReset` 
-/// es una cadena que representa la dirección de correo electrónico a la que se enviará el enlace 
-/// de restablecimiento de contraseña. Se usa para enviar el correo electrónico de restablecimiento 
-/// de contraseña a la dirección de correo electrónico especificada para que el usuario restablezca 
+/// para proporcionar el contexto del widget actual en el árbol de widgets. Se usa normalmente para
+/// mostrar elementos de la interfaz de usuario como SnackBars, diálogos o navegar a diferentes
+/// pantallas.
+/// Correo electrónico (String): el parámetro `email` en la función `sendPasswordReset`
+/// es una cadena que representa la dirección de correo electrónico a la que se enviará el enlace
+/// de restablecimiento de contraseña. Se usa para enviar el correo electrónico de restablecimiento
+/// de contraseña a la dirección de correo electrónico especificada para que el usuario restablezca
 /// su contraseña.
 Future<void> sendPasswordReset(BuildContext context, String email) async {
   final authService = AuthService();
@@ -147,18 +147,34 @@ Future<void> sendPasswordReset(BuildContext context, String email) async {
       stackTrace: stackTrace,
       withScope: (scope) {
         scope.setTag('operation', 'Send password Reset');
-          scope.setContexts('operation_context', email);
+        scope.setContexts('operation_context', email);
       },
     );
   }
 }
 
-  //Funcion para refrescar los claims despues de que el usuario tenga la sesión iniciada
+/// `refreshUserClaims`
+///
+/// Metodo que fuerza la actualización del token del usuario autenticado en Firebase.
+///
+/// ### Funcionalidad:
+/// - Obtiene el usuario autenticado con `FirebaseAuth`.
+/// - Si el usuario está autenticado, llama a `getIdToken(true)` para forzar la actualización del **token de autenticación**.
+/// - Esto es útil cuando se han cambiado los **custom claims** en Firebase y se requiere que los cambios se reflejen sin necesidad de que el usuario cierre sesión.
+///
+/// ### Uso:
+/// ```dart
+/// await refreshUserClaims();
+/// ```
+///
+/// ### Notas:
+/// - Es recomendable llamar a esta función después de modificar los roles del usuario en Firebase para asegurarse de que los nuevos claims sean reconocidos.
+/// - **El usuario debe estar autenticado** para que esta función tenga efecto.
+/// - No devuelve ningún valor, pero actualiza internamente el token del usuario.
 Future<void> refreshUserClaims() async {
   final user = FirebaseAuth.instance.currentUser;
   if (user != null) {
     await user.getIdToken(true); // Forzar actualización del token
-    print("Claims actualizados: ${await user.getIdTokenResult()}");
   }
 }
 

@@ -87,7 +87,7 @@ class _MyPaginatedTableState extends State<MyPaginatedTable> {
                 tooltipAssign: widget.tooltipAssign,
               ),
               rowsPerPage: _rowsPerPage, // Número de filas por pagina.
-              availableRowsPerPage: const [5, 10], // Valores para cambiar el numero de registros por pagina.
+              availableRowsPerPage: const [5, 15, 20, 30], // Valores para cambiar el numero de registros por pagina.
               onRowsPerPageChanged: (value) {
                 setState(() {
                   if(value != null) {
@@ -101,10 +101,10 @@ class _MyPaginatedTableState extends State<MyPaginatedTable> {
   }
 }
 
-  /// Fuente de datos para la tabla paginada.
-  ///
-  /// Esta clase extiende de [DataTableSource] y es responsable de construir cada fila
-  /// de la tabla a partir de los datos proporcionados.
+/// Fuente de datos para la tabla paginada.
+///
+/// Esta clase extiende de [DataTableSource] y es responsable de construir cada fila
+/// de la tabla a partir de los datos proporcionados.
 class _TableDataSource extends DataTableSource {
   final List<Map<String, dynamic>> data; // Datos a mostrar en la tabla.
   final List<String> fieldKeys; // Lista de claves de los campos que se utilizarán para extraer los valores.
@@ -174,34 +174,34 @@ class _TableDataSource extends DataTableSource {
                   inkFunction: () => onEdit(rowData[idKey].toString())),
               // Botón para eliminar o activar, dependiendo del estado.
               InkComponent(
-                  tooltip: onActive ? "Eliminar" : "Activar",
-                  iconInk: Icon(onActive ? Icons.delete_forever_sharp : Icons.power_settings_new,
+                tooltip: onActive ? "Eliminar" : "Activar",
+                iconInk: Icon(onActive ? Icons.delete_forever_sharp : Icons.power_settings_new,
                   color: Colors.red,
-                  ),
-                  inkFunction: () {
-                    // Validaciones para el boton de eliminar/activar, en caso de ocurrir un error
-                    // se registra en Sentry
-                    if (onActive) {
-                      try {
-                        onDelete(rowData[idKey].toString());
-                      } catch (e, stackTrace) {
-                        Sentry.captureException(e, stackTrace: stackTrace,
-                        withScope: (scope) {
-                          scope.setTag('Error_delete_PaginatedTable', rowData[idKey].toString());
-                        });
-                      }
-                    } else {
-                      try {
-                        activateFunction(rowData[idKey].toString());
-                      } catch (e, stackTrace) {
-                        Sentry.captureException(e, stackTrace: stackTrace,
-                        withScope: (scope) {
-                          scope.setTag('Error_activate_PaginatedTable', rowData[idKey].toString());
-                        }
-                        );
-                      }
+                ),
+                inkFunction: () {
+                  // Validaciones para el boton de eliminar/activar, en caso de ocurrir un error
+                  // se registra en Sentry
+                  if (onActive) {
+                    try {
+                      onDelete(rowData[idKey].toString());
+                    } catch (e, stackTrace) {
+                      Sentry.captureException(e, stackTrace: stackTrace,
+                          withScope: (scope) {
+                            scope.setTag('Error_delete_PaginatedTable', rowData[idKey].toString());
+                          });
                     }
-                  },),
+                  } else {
+                    try {
+                      activateFunction(rowData[idKey].toString());
+                    } catch (e, stackTrace) {
+                      Sentry.captureException(e, stackTrace: stackTrace,
+                          withScope: (scope) {
+                            scope.setTag('Error_activate_PaginatedTable', rowData[idKey].toString());
+                          }
+                      );
+                    }
+                  }
+                },),
               // Botón opcional para asignar, solo se muestra si se proporciona la función.
               if (onAssign != null)
                 InkComponent(
