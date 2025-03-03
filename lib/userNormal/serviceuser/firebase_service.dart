@@ -171,6 +171,7 @@ if (idSare != null) {
     return const Stream.empty();
   }
 }
+
  Stream<QuerySnapshot> getUserNotificationsCount(String userId) {
   try {
     return _firestore

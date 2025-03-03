@@ -1,7 +1,11 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+
+import 'package:plataformacnbbbjo/components/formPatrts/my_button.dart';
+import 'package:plataformacnbbbjo/dataConst/constand.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
@@ -157,7 +161,7 @@ class FirebaseService {
     try {
       ListResult coursesList = await _storage
           .ref(
-              '2025/CAPACITACIONES_LISTA_ASISTENCIA_PAPEL_SARES/Cursos_2025/$trimester/$dependency/$courseName')
+              '$trimester/$dependency/$courseName')
           .listAll();
 
       Map<String, String> files = {};
@@ -225,7 +229,7 @@ class FirebaseService {
   }
  
 
-  
+  /*
   Future<void> descargarZIP() async {
   final uri = Uri.parse("https://us-central1-expedientesems.cloudfunctions.net/generarZipDocumentos");
 
@@ -264,5 +268,44 @@ class FirebaseService {
       },
     );
   }
-}
+}*/
+Future<void> descargarZIP(BuildContext context, String trimestre) async {
+    final uri = Uri.parse("https://us-central1-expedientesems.cloudfunctions.net/generarZipPorTrimestre?trimestre=$trimestre");
+    try {
+      final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final downloadUrl = data["url"];
+        if (downloadUrl != null) {
+          if (await canLaunchUrl(Uri.parse(downloadUrl))) {
+            await launchUrl(Uri.parse(downloadUrl), mode: LaunchMode.externalApplication);
+          } else {
+            throw Exception("No se puede abrir el enlace de descarga.");
+          }
+        } else {
+           if (!context.mounted) return;
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Error'),
+            content: Text('No se pudo obtener los datos del archivo.'),
+            actions: [MyButton(text: "Aceptar", icon: Icon(Icons.check_circle_outline), buttonColor: greenColorLight, onPressed: () => Navigator.pop(context),)],
+          ),
+        );
+        return;
+        }
+      } else {
+        throw Exception("Error en la descarga: Código ${response.statusCode}");
+      }
+    } catch (exception, stackTrace) {
+       await Sentry.captureException(
+      exception,
+      stackTrace: stackTrace,
+      withScope: (scope) {
+        scope.setTag("firebase_function", "generarZipDocumentos");
+        scope.setContexts("uri", uri.toString());
+      },
+    );
+    }
+  }
 }

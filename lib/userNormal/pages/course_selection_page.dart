@@ -33,15 +33,17 @@ class _DynamicCourseSelectionPageState extends State<DynamicCourseSelectionPage>
     if (userId == null) {
       throw Exception('Usuario no autenticado');
     }
-
+     
     final cursos = await _firebaseService.obtenerCursosPendientes(userId, widget.cupo);
 
     setState(() {
       cursosPendientes = cursos;
       isLoading = false;
+      
     });
 
     if (cursos.isEmpty) {
+       
     }
   } on FirebaseException catch (exception, stackTrace) {
     await Sentry.captureException(
@@ -53,6 +55,7 @@ class _DynamicCourseSelectionPageState extends State<DynamicCourseSelectionPage>
     );
     setState(() {
       isLoading = false;
+      cursosPendientes = []; 
     });
   } catch (exception, stackTrace) {
     await Sentry.captureException(
@@ -64,6 +67,7 @@ class _DynamicCourseSelectionPageState extends State<DynamicCourseSelectionPage>
     );
     setState(() {
       isLoading = false;
+      cursosPendientes = []; 
     });
   }
 }
@@ -120,7 +124,8 @@ class _DynamicCourseSelectionPageState extends State<DynamicCourseSelectionPage>
                                 ),
                               );
                             },
-                            imagePath: 'assets/images/logo.jpg',
+                            
+                            imagePath: 'assets/images/logoActualizado.jpg',
                           );
                         },
                       );

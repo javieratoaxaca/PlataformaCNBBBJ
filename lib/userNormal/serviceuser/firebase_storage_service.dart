@@ -44,7 +44,7 @@ class FirebaseStorageService {
     }
 
     String fileName = basename(result.files.single.name);
-    String storagePath = '2025/CAPACITACIONES_LISTA_ASISTENCIA_PAPEL_SARES/Cursos_2025/$trimester/$dependency/$course/';
+    String storagePath = '$trimester/$dependency/$course/';
     if (subCourse != null) storagePath += '$subCourse/';
     storagePath += fileName;
 
