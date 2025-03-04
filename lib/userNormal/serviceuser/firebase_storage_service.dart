@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:flutter/material.dart';
 import 'package:plataformacnbbbjo/components/formPatrts/my_button.dart';
@@ -44,7 +45,9 @@ class FirebaseStorageService {
     }
 
     String fileName = basename(result.files.single.name);
-    String storagePath = '$trimester/$dependency/$course/';
+    String year = DateFormat('yyyy').format(DateTime.now());
+
+    String storagePath = '$year/$trimester/$dependency/$course/';
     if (subCourse != null) storagePath += '$subCourse/';
     storagePath += fileName;
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:plataformacnbbbjo/dataConst/constand.dart';
 import 'package:plataformacnbbbjo/userNormal/serviceuser/firebase_storage_service.dart';
 
 class CursosNormal extends StatefulWidget {
@@ -74,7 +75,7 @@ class _CursosNormalState extends State<CursosNormal> {
             Text(
               widget.subCourse != null
                   ? 'Sube la evidencia del curso en formato PDF para ${widget.trimester}, Dependencia: ${widget.dependecy}.'
-                  : 'Sube un documento PDF para el curso seleccionado (${widget.course}).',
+                  : 'Sube un documento PDF para el curso seleccionado (${widget.course}). \n El nombre del archivo debe ser: Constancia_NombreCurso_NombreCompleto',
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 18),
             ),
@@ -94,9 +95,13 @@ class _CursosNormalState extends State<CursosNormal> {
 
             // Botón de subida
             ElevatedButton.icon(
+             
               onPressed: isUploading ? null : _uploadPDF, // Deshabilita si está subiendo
-              icon: const Icon(Icons.upload_file),
-              label: const Text('Seleccionar y Subir PDF'),
+              icon: const Icon(Icons.upload_file, color: greenColorLight,),     
+              label: const Text('Seleccionar y Subir PDF',
+              style: TextStyle(
+              color: greenColorLight, ),
+            ),
             ),
           ],
         ),

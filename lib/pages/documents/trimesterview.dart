@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:plataformacnbbbjo/components/formPatrts/actions_form_check.dart';
+import 'package:plataformacnbbbjo/components/formPatrts/my_button.dart';
 import 'package:plataformacnbbbjo/dataConst/constand.dart';
 import 'package:plataformacnbbbjo/pages/documents/dependenciesview.dart';
 import 'package:plataformacnbbbjo/pages/documents/firebaseservice.dart';
@@ -113,10 +115,12 @@ class _TrimesterViewState extends State<TrimesterView> {
                                 top: 10,
                                 right: 10,
                                 child: IconButton(
+                                  
+                                  onPressed:() => _descargarYEliminarZIP(
+                                    context,
+                                    trimester
+                                  ),
                                   icon: const Icon(Icons.download, color: greenColorLight, size: 30),
-                                  onPressed:()async{
-                                  await _firebaseService.descargarZIP(context, trimester);
-                                    },
                                   tooltip: "Descargar archivos de este trimestre",
                                 ),
                               ),
@@ -129,4 +133,55 @@ class _TrimesterViewState extends State<TrimesterView> {
                 ),
     );
   }
+  void _descargarYEliminarZIP(BuildContext context, String trimestre) {
+  showDialog(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: const Text("Confirmar"),
+      content: Text("Al aceptar, se descargarán y eliminarán los archivos del trimestre $trimestre. \n ¿Continuar?"),
+      actions:[
+        ActionsFormCheck(
+          isEditing: true,
+          onCancel: (){
+            if (dialogContext.mounted) {
+             Navigator.of(dialogContext).pop();
+          }
+          },
+          onUpdate: ()async{
+            if (dialogContext.mounted) {
+              Navigator.of(dialogContext).pop();
+            }
+            if (!context.mounted) return;
+            await _firebaseService.descargarZIP(context, trimestre);
+             final archivosExisten = await _firebaseService.verificarArchivosTrimestre(trimestre);
+             if (!context.mounted) return;
+            if (archivosExisten) {
+              await _firebaseService.eliminarArchivosTrimestre(context, trimestre);
+            } else {
+              if (!context.mounted) return;
+              //mostrarDialogo(context, "Sin archivos", "No hay archivos en el trimestre $trimestre para eliminar.");
+            }
+          },
+        )
+      ]
+    ),
+  );
+}
+void mostrarDialogo(BuildContext context, String titulo, String mensaje) {
+  if (!context.mounted) return;
+
+  showDialog(
+    context: context,
+    builder: (BuildContext dialogContext) {
+      return AlertDialog(
+        title: Text(titulo),
+        content: Text(mensaje),
+        actions: [
+           MyButton(text: "Aceptar", icon: Icon(Icons.check_circle_outline), buttonColor: greenColorLight, onPressed: () => Navigator.pop(context),),
+        ],
+      );
+    },
+  );
+}
+
 }

@@ -17,14 +17,15 @@ exports.generarZipPorTrimestre = functions.https.onRequest(async (req, res) => {
     }
 
     // Filtrar archivos por el trimestre dentro del Storage
+    const year = new Date().getFullYear();
     const [files] = await bucket.getFiles({
-      prefix: `${
+      prefix: `${year}/${
         trimestre}/`});
     if (files.length === 0) {
       return res.status(404).json({error: "No se encontraron archivos"});
     }
 
-    const zipFileName = `documentos_${trimestre}_${Date.now()}.zip`;
+    const zipFileName = `constancias_${trimestre}_${Date.now()}.zip`;
     const tempFilePath = `/tmp/${zipFileName}`;
 
     const archive = archiver("zip", {zlib: {level: 9}});
@@ -48,12 +49,6 @@ exports.generarZipPorTrimestre = functions.https.onRequest(async (req, res) => {
       action: "read",
       expires: Date.now() + 60 * 60 * 1000, // 1 hora de validez
     });
-    /*
-    //Borrar archivos pdf del storage
-    const deletePromises = files.map((file)=> file.delete());
-    await Promise.all(deletePromises);
-    console.log(`ZIP generado y archivos eliminados para el trimestre ${
-      trimestre}`);*/
     res.set("Access-Control-Allow-Origin", "*");
     res.status(200).json({url: zipFileUrl});
   } catch (error) {
@@ -61,3 +56,46 @@ exports.generarZipPorTrimestre = functions.https.onRequest(async (req, res) => {
     res.status(500).json({error: "Error al generar el archivo ZIP"});
   }
 });
+
+exports.eliminarArchivosPorTrimestre=
+functions.https.onRequest(async (req, res)=>{
+  try {
+    const {trimestre} = req.query;
+    if (!trimestre) {
+      return res.status(400).json({
+        error: "Debe proporcionar un trimestre."});
+    }
+
+    // Ruta base en Storage donde se guardan los archivos del trimestre
+    const year = new Date().getFullYear();
+    const folderPath = `${year}/${trimestre}/`;
+
+    // Obtener todos los archivos dentro de la carpeta del trimestre
+    const [files] = await bucket.getFiles({prefix: folderPath});
+
+    if (files.length === 0) {
+      return res.status(404).json({
+        message: `No hay archivos para el trimestre ${trimestre}.`});
+    }
+
+    // Filtrar solo archivos y no carpetas vacías
+    const archivosAEliminar= files.filter((file) => file.name.endsWith(".pdf"));
+
+    if (archivosAEliminar.length === 0) {
+      return res.status(404).json({
+        message: `No hay archivos PDF en el trimestre ${trimestre}.`});
+    }
+
+    // Eliminar todos los archivos encontrados
+    await Promise.all(archivosAEliminar.map((file) => file.delete()));
+
+    return res.status(200).json({
+      message: `Todos los archivos del trimestre${
+        trimestre} han sido eliminados.`});
+  } catch (error) {
+    console.error("Error al eliminar archivos:", error);
+    return res.status(500).json({
+      error: "Error al eliminar archivos del trimestre."});
+  }
+});
+

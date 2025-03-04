@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-
+import 'package:intl/intl.dart';
 import 'package:plataformacnbbbjo/components/formPatrts/my_button.dart';
 import 'package:plataformacnbbbjo/dataConst/constand.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -159,9 +159,11 @@ class FirebaseService {
   Future<Map<String, String>> getCourseFiles(
       String trimester, String dependency, String courseName) async {
     try {
+       String year = DateFormat('yyyy').format(DateTime.now());
       ListResult coursesList = await _storage
+      
           .ref(
-              '$trimester/$dependency/$courseName')
+              '$year/$trimester/$dependency/$courseName')
           .listAll();
 
       Map<String, String> files = {};
@@ -227,11 +229,10 @@ class FirebaseService {
       rethrow;
     }
   }
- 
 
-  /*
-  Future<void> descargarZIP() async {
-  final uri = Uri.parse("https://us-central1-expedientesems.cloudfunctions.net/generarZipDocumentos");
+ Future<void> descargarZIP(BuildContext context, String trimestre) async {
+  final uri = Uri.parse(
+      "https://us-central1-expedientesems.cloudfunctions.net/generarZipPorTrimestre?trimestre=$trimestre");
 
   try {
     final response = await http.get(uri);
@@ -240,25 +241,28 @@ class FirebaseService {
       final data = jsonDecode(response.body);
       final downloadUrl = data["url"];
 
-      if (downloadUrl != null) {
+      if (downloadUrl != null && downloadUrl.isNotEmpty) {
         
-
-        //brir el enlace en el navegador
         if (await canLaunchUrl(Uri.parse(downloadUrl))) {
           await launchUrl(Uri.parse(downloadUrl), mode: LaunchMode.externalApplication);
         } else {
-          throw Exception("No se puede abrir el enlace de descarga.");
+          
         }
       } else {
-        throw Exception("No se recibió una URL de descarga válida.");
+        if (!context.mounted) return;
+        mostrarDialogo(context, "Sin archivos", "No hay archivos disponibles para el trimestre $trimestre.");
       }
+    } else if (response.statusCode == 404) {
+      if (!context.mounted) return;
+      mostrarDialogo(context, "Sin archivos", "No hay archivos disponibles para el trimestre $trimestre.");
     } else {
-      throw Exception("Error en la descarga: Código ${response.statusCode}");
+      if (!context.mounted) return;
+      mostrarDialogo(context, "Error en la descarga", "Error: ${response.statusCode}");
     }
+   
   } catch (exception, stackTrace) {
-    
-
-    //Capturar el error en Sentry
+     if (!context.mounted) return;
+    mostrarDialogo(context, "Sin archivos", "No hay archivos disponibles para el trimestre $trimestre.");
     await Sentry.captureException(
       exception,
       stackTrace: stackTrace,
@@ -268,37 +272,31 @@ class FirebaseService {
       },
     );
   }
-}*/
-Future<void> descargarZIP(BuildContext context, String trimestre) async {
-    final uri = Uri.parse("https://us-central1-expedientesems.cloudfunctions.net/generarZipPorTrimestre?trimestre=$trimestre");
-    try {
-      final response = await http.get(uri);
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final downloadUrl = data["url"];
-        if (downloadUrl != null) {
-          if (await canLaunchUrl(Uri.parse(downloadUrl))) {
-            await launchUrl(Uri.parse(downloadUrl), mode: LaunchMode.externalApplication);
-          } else {
-            throw Exception("No se puede abrir el enlace de descarga.");
-          }
-        } else {
-           if (!context.mounted) return;
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text('Error'),
-            content: Text('No se pudo obtener los datos del archivo.'),
-            actions: [MyButton(text: "Aceptar", icon: Icon(Icons.check_circle_outline), buttonColor: greenColorLight, onPressed: () => Navigator.pop(context),)],
-          ),
-        );
-        return;
-        }
-      } else {
-        throw Exception("Error en la descarga: Código ${response.statusCode}");
-      }
-    } catch (exception, stackTrace) {
-       await Sentry.captureException(
+}
+
+
+
+Future<void> eliminarArchivosTrimestre(BuildContext context, String trimestre) async {
+  final uri = Uri.parse(
+      "https://us-central1-expedientesems.cloudfunctions.net/eliminarArchivosPorTrimestre?trimestre=$trimestre");
+
+  try {
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      if (!context.mounted) return;
+      mostrarDialogo(context, "Eliminación completa", "Se han eliminado los archivos del trimestre $trimestre.");
+    } else if (response.statusCode == 404) {
+      if (!context.mounted) return;
+      mostrarDialogo(context, "Sin archivos", "No hay archivos en el trimestre $trimestre para eliminar.");
+    } else {
+      if (!context.mounted) return;
+      mostrarDialogo(context, "Error en eliminación", "Código de error: ${response.statusCode}");
+    }
+  } catch (exception, stackTrace) {
+    if (!context.mounted) return;
+    mostrarDialogo(context, "Error inesperado", "No se pudieron eliminar los archivos.");
+    await Sentry.captureException(
       exception,
       stackTrace: stackTrace,
       withScope: (scope) {
@@ -306,6 +304,37 @@ Future<void> descargarZIP(BuildContext context, String trimestre) async {
         scope.setContexts("uri", uri.toString());
       },
     );
-    }
   }
+}
+void mostrarDialogo(BuildContext context, String titulo, String mensaje) {
+  if (!context.mounted) return;
+
+  showDialog(
+    context: context,
+    builder: (BuildContext dialogContext) {
+      return AlertDialog(
+        title: Text(titulo),
+        content: Text(mensaje),
+        actions: [
+           MyButton(text: "Aceptar", icon: Icon(Icons.check_circle_outline), buttonColor: greenColorLight, onPressed: () => Navigator.pop(context),),
+        ],
+      );
+    },
+  );
+}
+Future<bool> verificarArchivosTrimestre(String trimestre) async {
+  final uri = Uri.parse(
+      "https://us-central1-expedientesems.cloudfunctions.net/eliminarArchivosPorTrimestre?trimestre=$trimestre");
+
+  try {
+    final response = await http.get(uri);
+    if (response.statusCode == 404) {
+      return false; // No hay archivos
+    }
+    return true; // Sí hay archivos
+  } catch (e) {
+    return false; // Error en la solicitud, asumimos que no hay archivos
+  }
+}
+
 }
