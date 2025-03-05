@@ -23,13 +23,13 @@ void showCustomSnackBar(BuildContext context, String message, Color status) {
     content: Text(
       message,
       style: const TextStyle(
-          fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+          fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
     ),
     duration: const Duration(milliseconds: 2000),
     margin: EdgeInsets.only(
-      bottom: MediaQuery.of(context).size.height * 0.8,
-      left: screenWidth * 0.3,
-      right: screenWidth * 0.3
+      bottom: MediaQuery.of(context).size.height * 0.7,
+      left: screenWidth * 0.1,
+      right: screenWidth * 0.1
     ),
     backgroundColor: status,
     behavior: SnackBarBehavior.floating,
