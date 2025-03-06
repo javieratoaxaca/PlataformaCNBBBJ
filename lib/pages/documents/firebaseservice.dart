@@ -336,5 +336,52 @@ Future<bool> verificarArchivosTrimestre(String trimestre) async {
     return false; // Error en la solicitud, asumimos que no hay archivos
   }
 }
+Future<void> descargarExcel(BuildContext context) async {
+  final uri = Uri.parse(
+      "https://us-central1-expedientesems.cloudfunctions.net/generarExcelCursos");
+   // Log de inicio
+
+  try {
+    final response = await http.get(uri);
+    
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final downloadUrl = data["url"];
+      
+      if (downloadUrl != null && downloadUrl.isNotEmpty) {
+        if (await canLaunchUrl(Uri.parse(downloadUrl))) {
+          
+          await launchUrl(Uri.parse(downloadUrl), mode: LaunchMode.externalApplication);
+        } else {
+          
+          // Aquí podrías mostrar un diálogo o un mensaje de error
+        }
+      } else {
+        if (!context.mounted) return;
+        mostrarDialogo(context, "Sin archivos", "No hay archivos disponibles para descargar.");
+      }
+    } else if (response.statusCode == 404) {
+      if (!context.mounted) return;
+      mostrarDialogo(context, "Sin archivos", "No hay archivos disponibles para descargar.");
+    } else {
+      if (!context.mounted) return;
+      mostrarDialogo(context, "Error en la descarga", "Error: ${response.statusCode}");
+    }
+  } catch (exception, stackTrace) {
+    
+    if (!context.mounted) return;
+    mostrarDialogo(context, "Error", "Ocurrió un error al descargar el archivo Excel.");
+    await Sentry.captureException(
+      exception,
+      stackTrace: stackTrace,
+      withScope: (scope) {
+        scope.setTag("firebase_function", "generarExcelCursos");
+        scope.setContexts("uri", uri.toString());
+      },
+    );
+  }
+}
+
+
 
 }

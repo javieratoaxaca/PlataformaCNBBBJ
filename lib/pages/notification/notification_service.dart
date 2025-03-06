@@ -37,8 +37,6 @@ class NotificationService {
       rethrow;
     }
   }
-
-
   //Marcar un curso como completado y almacenarlo en "CursosCompletados"
   Future<void> marcarCursoCompletado(String userId, String cursoId, String evidenciaUrl) async {
   try {

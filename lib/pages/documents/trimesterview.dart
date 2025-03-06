@@ -131,8 +131,18 @@ class _TrimesterViewState extends State<TrimesterView> {
                     },
                   ),
                 ),
+                 floatingActionButton: FloatingActionButton.extended(
+        onPressed: ()async{
+            await _firebaseService.descargarExcel(context);
+        },
+        
+        icon: const Icon(Icons.download),
+        label: const Text("Descargar Archivos"),
+        backgroundColor: greenColorLight,
+      ),
     );
   }
+  
   void _descargarYEliminarZIP(BuildContext context, String trimestre) {
   showDialog(
     context: context,
