@@ -3,9 +3,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
+/// `PaginatedTableService` maneja la obtención de datos de cursos completados por un usuario 
+/// desde Firebase Firestore.
 class PaginatedTableService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  /// `fetchCompletedCourses` Obtiene la lista de cursos completados por el usuario autenticado.
+  ///
+  /// Retorna una lista de mapas con información sobre los cursos:
+  /// - `Nombre del curso`: Nombre del curso completado.
+  /// - `Trimestre`: Trimestre en el que se cursó.
+  /// - `Fecha de envio de Constancia`: Fecha formateada de finalización.
   Future<List<Map<String, dynamic>>> fetchCompletedCourses() async {
 
     try {
@@ -14,6 +22,7 @@ class PaginatedTableService {
 
       String uid = auth.currentUser?.uid ?? '';
 
+      // Obtiene los documentos donde el UID coincide con el usuario autenticado.
       QuerySnapshot cursosCompletadosSnapshot =
       await _firestore.collection('CursosCompletados').where('uid', isEqualTo: uid).get();
 
@@ -66,6 +75,7 @@ class PaginatedTableService {
 
       return tempRows;
     } catch (e, stackTrace) {
+      // Captura errores en Sentry para su monitoreo
       await Sentry.captureException(e, stackTrace: stackTrace,
       withScope: (scope) {
         scope.setTag('Table employee', 'No data find');

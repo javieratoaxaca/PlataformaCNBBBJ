@@ -74,9 +74,6 @@ Future<void> importExcelWithSareToFirebase(BuildContext context) async {
         // Subir los datos a Firebase
         await FirebaseFirestore.instance.collection('Empleados').doc(id).set(
             data);
-        if(context.mounted) {
-          showCustomSnackBar(context, 'Datos agregados correctamente', greenColorLight);
-        }
       } on FirebaseException catch (e, stackTrace) {
         // Reporta el error a Sentry en caso de ocurrir
         await Sentry.captureException(

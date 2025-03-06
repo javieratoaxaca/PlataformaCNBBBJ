@@ -3,6 +3,7 @@ import 'package:plataformacnbbbjo/components/formPatrts/actions_form_check.dart'
 import 'package:plataformacnbbbjo/components/formPatrts/custom_snackbar.dart';
 import 'package:plataformacnbbbjo/components/upFiles/data_from_table.dart';
 import 'package:plataformacnbbbjo/components/upFiles/table_example.dart';
+import 'package:plataformacnbbbjo/dataConst/constand.dart';
 import 'package:plataformacnbbbjo/service/import_data_from_firebase.dart';
 import 'package:plataformacnbbbjo/util/responsive.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -54,6 +55,9 @@ class _MessageSendFileState extends State<MessageSendFile> {
                 await importExcelWithSareToFirebase(context);
                 if(context.mounted) {
                   Navigator.pop(context);
+                }
+                if(context.mounted) {
+                showCustomSnackBar(context, 'Datos agregados correctamente', greenColorLight);
                 }
               } catch (e, stackTrace) {
                 if(context.mounted) {
