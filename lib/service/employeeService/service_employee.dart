@@ -69,7 +69,7 @@ Future<void> addEmployee(
     "Sexo": sexDropdownValue,
     "Estado": "Activo",
     "Area": controllerArea.selectedValue,
-    "Sección": controllerSection.selectedValue,
+    "Seccion": controllerSection.selectedValue,
     "Puesto": controllerPuesto.selectedValue,
     "IdSare": controllerSare.selectedDocument?['IdSare'],
     "Sare": controllerSare.selectedDocument?['sare'],
