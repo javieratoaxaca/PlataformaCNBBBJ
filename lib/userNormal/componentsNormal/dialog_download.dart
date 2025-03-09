@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:plataformacnbbbjo/components/formPatrts/actions_form_check.dart';
+import 'package:plataformacnbbbjo/components/formPatrts/custom_snackbar.dart';
+import 'package:plataformacnbbbjo/dataConst/constand.dart';
 import 'package:plataformacnbbbjo/userNormal/serviceuser/service_apk.dart';
 import 'package:plataformacnbbbjo/util/responsive.dart';
 
@@ -35,7 +37,11 @@ class _DialogDownloadState extends State<DialogDownload> {
         Center(
           child: ActionsFormCheck(isEditing: true,
           onUpdate: () async {
-            await downloadApkFile();
+            await downloadApkFile(context);
+            if(context.mounted) {
+              showCustomSnackBar(context, 'Aplicación descargada correctamente', greenColorLight);
+              Navigator.pop(context);
+            }
           },
           onCancel: () => Navigator.pop(context),
           ),

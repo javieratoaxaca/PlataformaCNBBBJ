@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:plataformacnbbbjo/util/responsive.dart';
 
 
 /// La función `showCustomSnackBar` muestra una SnackBar con un estilo personalizado con un 
@@ -22,14 +23,14 @@ void showCustomSnackBar(BuildContext context, String message, Color status) {
     dismissDirection: DismissDirection.up,
     content: Text(
       message,
-      style: const TextStyle(
-          fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+      style: TextStyle(
+          fontSize: responsiveFontSize(context, 18), color: Colors.white, fontWeight: FontWeight.bold),
     ),
     duration: const Duration(milliseconds: 2000),
     margin: EdgeInsets.only(
       bottom: MediaQuery.of(context).size.height * 0.8,
-      left: screenWidth * 0.3,
-      right: screenWidth * 0.3
+      left: Responsive.isMobile(context) ? screenWidth * 0.1 : screenWidth * 0.3,
+      right: Responsive.isMobile(context) ? screenWidth * 0.1 : screenWidth * 0.3,
     ),
     backgroundColor: status,
     behavior: SnackBarBehavior.floating,
