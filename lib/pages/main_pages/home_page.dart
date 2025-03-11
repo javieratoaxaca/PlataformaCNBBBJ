@@ -156,6 +156,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  //Navegación del menu lateral mediante los componentes segun la selección.
   Widget _getContentForState(NavItem selectedItem) {
     switch (selectedItem) {
       case NavItem.homeView:
@@ -175,6 +176,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  //Nombre dinamico del menu segun la selección actual.
   String _getAppbarTitle(NavItem selectedItem) {
     switch (selectedItem) {
       case NavItem.homeView:
