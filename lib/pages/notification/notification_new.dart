@@ -6,6 +6,7 @@ import 'package:plataformacnbbbjo/dataConst/constand.dart';
 import 'package:plataformacnbbbjo/pages/notification/notification_service.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
 
 class NotificationNew extends StatelessWidget {
   final NotificationService _notificationService = NotificationService();
@@ -138,17 +139,51 @@ class NotificationNew extends StatelessWidget {
                               final pdfUrl = notification['pdfUrl'];
                               _notificationService.marcarNotificacionLeida(notification.id);
                               if (pdfUrl != null && pdfUrl.isNotEmpty) {
-                                // ignore: deprecated_member_use
-                                if (await canLaunch(pdfUrl)) {
-                                  // ignore: deprecated_member_use
-                                  await launch(pdfUrl);
-                                } else {
-                                  if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('No se puede abrir el archivo PDF')),
-                                  );
-                                  } 
-                                }
+                                 try {
+      //verificar si el archivo existe en Storage con una peticion head
+      final response = await http.head(Uri.parse(pdfUrl));
+
+      if (response.statusCode == 200) {
+        // El archivo existe, abrirlo en el navegador
+        if (await canLaunchUrl(Uri.parse(pdfUrl))) {
+          await launchUrl(Uri.parse(pdfUrl), mode: LaunchMode.externalApplication);
+        } else {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('No se puede abrir el archivo PDF')),
+            );
+          }
+        }
+      } else if (response.statusCode == 404) {
+        // El archivo ya no se encuentra en el Storage
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('El archivo PDF ya no está disponible en el servidor')),
+          );
+        }
+      } else {
+        // Otro error de archivo
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Ocurrió un error al verificar el archivo')),
+          );
+        }
+      }
+    } catch (e) {
+      // Error al hacer la petición HTTP
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo verificar el archivo. Revisa tu conexión a internet.')),
+        );
+      }
+    }
+  } else {
+    // Si no hay URL en la notificación, mostrar un mensaje
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No hay un archivo PDF asociado a esta notificación')),
+      );
+    }
                               }
                             },
                           );
