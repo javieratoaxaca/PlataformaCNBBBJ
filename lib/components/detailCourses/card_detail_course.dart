@@ -127,8 +127,8 @@ class _CardDetailcourseState extends State<CardDetailCourse> {
                   },
                   viewInactivos: viewInactivos,
                   title: "Cursos asignados",
-                  viewOn: "Mostrar inactivos",
-                  viewOff: "Mostrar activos"),
+                  viewOn: "Mostrar Inactivos",
+                  viewOff: "Mostrar Activos"),
               const Divider(),
               _isLoading
                   ? const Center(

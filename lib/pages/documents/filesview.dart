@@ -72,6 +72,7 @@ class _FilesListPageState extends State<FilesListPage> {
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         trailing: IconButton(
+                          tooltip: 'Descargar',
                           icon: const Icon(Icons.download),
                           onPressed: () => _downloadFile(fileUrl),
                         ),

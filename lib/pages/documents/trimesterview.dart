@@ -137,7 +137,7 @@ class _TrimesterViewState extends State<TrimesterView> {
         },
         
         icon: const Icon(Icons.download),
-        label: const Text("Descargar Archivos"),
+        label: const Text("Descargar Reporte"),
         backgroundColor: greenColorLight,
       ),
     );
