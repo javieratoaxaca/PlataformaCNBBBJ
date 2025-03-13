@@ -75,7 +75,7 @@ class _CursosNormalState extends State<CursosNormal> {
             Text(
               widget.subCourse != null
                   ? 'Sube la evidencia del curso en formato PDF para ${widget.trimester}, Dependencia: ${widget.dependecy}.'
-                  : 'Sube un documento PDF para el curso seleccionado (${widget.course}). \n El nombre del archivo debe ser: Constancia_NombreCurso_NombreCompleto',
+                  : 'Sube un documento PDF para el curso seleccionado (${widget.course}). \n El nombre del archivo debe ser: CONSTANCIA_NOMBRECURSO_NOMBRECOMPLETO_CUPO_ESTADO',
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 18),
             ),

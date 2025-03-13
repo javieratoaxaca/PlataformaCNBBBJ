@@ -27,7 +27,7 @@ void showCustomSnackBar(BuildContext context, String message, Color status) {
     ),
     duration: const Duration(milliseconds: 2000),
     margin: EdgeInsets.only(
-      bottom: MediaQuery.of(context).size.height * 0.7,
+      bottom: MediaQuery.of(context).size.height * 0.8,
       left: screenWidth * 0.1,
       right: screenWidth * 0.1
     ),

@@ -55,6 +55,24 @@ if (idSare != null) {
     query = query.where('Estado', isEqualTo: 'Activo');
     // Filtrar solo cursos activos
 
+    if (idOre != null && idSare != null) {
+      query = query.where(Filter.or(
+          Filter('IdOre', isEqualTo: idOre),
+          Filter('IdSare', isEqualTo: idSare),
+          Filter('IdSare', isEqualTo: '10101'),
+          Filter('IdSare', isEqualTo: '146554')
+      ));
+    } else if (idOre != null) {
+      query = query.where(Filter.or(
+          Filter('IdOre', isEqualTo: idOre),
+          Filter('IdSare', isEqualTo: '146554')
+      ));
+    } else if (idSare != null) {
+      query = query.where(Filter.or(
+          Filter('IdSare', isEqualTo: idSare),
+          Filter('IdSare', isEqualTo: '10101')
+      ));
+    }
 
     final detalleCursosSnapshot = await query.get();
 
