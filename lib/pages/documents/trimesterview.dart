@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:plataformacnbbbjo/components/formPatrts/actions_form_check.dart';
+import 'package:plataformacnbbbjo/components/formPatrts/custom_snackbar.dart';
 import 'package:plataformacnbbbjo/components/formPatrts/my_button.dart';
 import 'package:plataformacnbbbjo/dataConst/constand.dart';
 import 'package:plataformacnbbbjo/pages/documents/dependenciesview.dart';
 import 'package:plataformacnbbbjo/pages/documents/firebaseservice.dart';
+  import 'package:plataformacnbbbjo/service/report_excel.dart';
 
 class TrimesterView extends StatefulWidget {
   const TrimesterView({super.key});
@@ -52,117 +54,103 @@ Widget build(BuildContext context) {
                       aspectRatio = 1.8;
                     } 
 
-                    return GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        crossAxisSpacing: 16.0,
-                        mainAxisSpacing: 16.0,
-                        childAspectRatio: aspectRatio,
-                      ),
-                      itemCount: trimesters.length,
-                      itemBuilder: (context, index) {
-                        String trimester = trimesters[index];
-                        return Stack(
-                          children: [
-                            Material(
-                              borderRadius: BorderRadius.circular(12),
-                              elevation: 5,
-                              child: InkWell(
+                      return GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          crossAxisSpacing: 16.0,
+                          mainAxisSpacing: 16.0,
+                          childAspectRatio: aspectRatio,
+                        ),
+                        itemCount: trimesters.length,
+                        itemBuilder: (context, index) {
+                          String trimester = trimesters[index];
+                          return Stack(
+                            children: [
+                              Material(
                                 borderRadius: BorderRadius.circular(12),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => DependenciesView(
-                                        trimester: trimester,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: Column(
-                                  children: [
-                                    Expanded(
-                                      flex: 2,
-                                      child: ClipRRect(
-                                        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                                        child: Image.asset(
-                                          fit: BoxFit.cover,
-                                          'assets/images/logoActualizado.jpg',
-                                          width: double.infinity,
-                                          height: 100,
+                                elevation: 5,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(12),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => DependenciesView(
+                                          trimester: trimester,
                                         ),
                                       ),
-                                    ),
-                                    Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text(
-                                          'Trimestre $trimester',
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
+                                    );
+                                  },
+                                  child: Column(
+                                    children: [
+                                      Expanded(
+                                        flex: 2,
+                                        child: ClipRRect(
+                                          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                                          child: Image.asset(
+                                            fit: BoxFit.cover,
+                                            'assets/images/logoActualizado.jpg',
+                                            width: double.infinity,
+                                            height: 100,
+                                            
                                           ),
-                                          textAlign: TextAlign.center,
                                         ),
                                       ),
-                                    ),
-                                    // 🔹 Se agregó el botón dentro del `Column` de la Card
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                      child: Column(
-                                        children: [
-                                          // Botón Descargar ZIP (ya estaba)
-                                          /*
-                                          ElevatedButton.icon(
-                                            onPressed: () => _descargarYEliminarZIP(context, trimester),
-                                            icon: const Icon(Icons.archive),
-                                            label: const Text("Descargar ZIP"),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.green,
-                                              foregroundColor: Colors.white,
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(
+                                            'Trimestre $trimester',
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
                                             ),
-                                          ),*/
-                                          
-                                          
-                                        ],
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                            Positioned(
-                              top: 10,
-                              right: 10,
-                              child: IconButton(
-                                onPressed: () => _descargarYEliminarZIP(
-                                  context,
-                                  trimester
+                              Positioned(
+                                top: 10,
+                                right: 10,
+                                child: IconButton(
+                                  
+                                  onPressed:() => _descargarYEliminarZIP(
+                                    context,
+                                    trimester
+                                  ),
+                                  icon: const Icon(Icons.download, color: greenColorLight, size: 30),
+                                  tooltip: "Descargar archivos de este trimestre",
                                 ),
-                                icon: const Icon(Icons.download, color: greenColorLight, size: 30),
-                                tooltip: "Descargar archivos de este trimestre",
                               ),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ),
-              ),
-           /*
-    floatingActionButton: FloatingActionButton.extended(
-      onPressed: () async {
-        await _firebaseService.descargarExcel(context);
-      },
-      icon: const Icon(Icons.download),
-      label: const Text("Descargar Excel"),
-      backgroundColor: greenColorLight,
-    ),*/
-  );
-}
-
-
+                 floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          try {
+            await generarExcelCursosCompletados();
+            if (!mounted) return;
+            showCustomSnackBar(context, 'Archivo descargado correctamente', greenColorLight);
+          } catch (e) {
+            if (!mounted) return;
+            showCustomSnackBar(context, 'Error al descargar el archivo', Colors.red);
+          }
+        },
+        icon: const Icon(Icons.download),
+        label: const Text("Descargar Reporte"),
+        backgroundColor: greenColorLight,
+      ),
+    );
+  }
+  
   void _descargarYEliminarZIP(BuildContext context, String trimestre) {
   showDialog(
     context: context,

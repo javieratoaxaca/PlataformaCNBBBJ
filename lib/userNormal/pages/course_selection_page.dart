@@ -80,7 +80,7 @@ class _DynamicCourseSelectionPageState extends State<DynamicCourseSelectionPage>
           : cursosPendientes.isEmpty
               ? const Center(child: Text('No hay cursos pendientes.'))
               : Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(10.0),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       // ignore: unused_local_variable
@@ -124,8 +124,6 @@ class _DynamicCourseSelectionPageState extends State<DynamicCourseSelectionPage>
                                 ),
                               );
                             },
-                            
-                            imagePath: 'assets/images/logoActualizado.jpg',
                           );
                         },
                       );
@@ -141,7 +139,6 @@ class CourseCard extends StatelessWidget {
   final String trimester;
   final String? startDate;
   final VoidCallback onTap;
-  final String imagePath;
 
   const CourseCard({
     super.key,
@@ -149,7 +146,6 @@ class CourseCard extends StatelessWidget {
     required this.trimester,
     this.startDate,
     required this.onTap,
-    required this.imagePath,
   });
 
   @override
@@ -168,12 +164,12 @@ class CourseCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
-                  imagePath,
-                  height: MediaQuery.of(context).size.width < 400 ? 80 : 100,
+                  'assets/images/logoActualizado.jpg',
+                  height: MediaQuery.of(context).size.width < 600 ? 70 : 100,
                   width: double.infinity,
                   fit: BoxFit.cover,
                 ),
-                const SizedBox(height: 15),
+                const SizedBox(height: 20),
                 Text(
                   courseName,
                   style: TextStyle(
@@ -182,14 +178,14 @@ class CourseCard extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 Text(
                   'Trimestre: $trimester',
                   style: TextStyle(fontSize: responsiveFontSize(context, 14)),
                   textAlign: TextAlign.center,
                 ),
                 if (startDate != null) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 10),
                   Text(
                     'Inicio: $startDate',
                     style: TextStyle(fontSize: responsiveFontSize(context, 14)),

@@ -11,9 +11,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await SentryFlutter.init((options) {
-    options.dsn = 'https://fc5884625a402f576572138cf77ae88c@o4508671006867456.ingest.us.sentry.io/4508671015649280';
-    options.tracesSampleRate = 1.0; //CAPTURA EL 100% DE LAS TRANSACCIONES EN PRODUCCION
-    options.profilesSampleRate = 1.0; //CAPURA EL 100% DE LAS TRANSACCIONES RASTREADAS
+    options.dsn = 'https://4a07a0bc008b9ee9e2126c4950b70287@o4508933325848576.ingest.us.sentry.io/4508933337448448';
+    options.tracesSampleRate = 0.1; //CAPTURA EL 100% DE LAS TRANSACCIONES EN PRODUCCION
+    options.profilesSampleRate = 0.1; //CAPURA EL 100% DE LAS TRANSACCIONES RASTREADAS
   });
 
   runApp(
