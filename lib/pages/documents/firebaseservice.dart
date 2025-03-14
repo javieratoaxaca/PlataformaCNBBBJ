@@ -353,8 +353,8 @@ Future<void> descargarExcel(BuildContext context) async {
           
           await launchUrl(Uri.parse(downloadUrl), mode: LaunchMode.externalApplication);
         } else {
-          
-          // Aquí podrías mostrar un diálogo o un mensaje de error
+          if (!context.mounted) return;
+          mostrarDialogo(context, "Error", "Problemas al generar la descarga.");
         }
       } else {
         if (!context.mounted) return;

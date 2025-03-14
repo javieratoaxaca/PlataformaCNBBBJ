@@ -62,6 +62,7 @@ exports.generarZipPorTrimestre = functions.https.onRequest(async (req, res) => {
 
 exports.eliminarArchivosPorTrimestre=
 functions.https.onRequest(async (req, res)=>{
+  res.set("Access-Control-Allow-Origin", "*");
   try {
     const {trimestre} = req.query;
     if (!trimestre) {
@@ -104,11 +105,10 @@ functions.https.onRequest(async (req, res)=>{
 
 
 exports.generarExcelCursos = functions.https.onRequest(async (req, res) => {
-  res.set("Access-Control-Allow-Origin", "*");
   try {
-    console.log("Iniciando generación del Excel...");
+    console.log("🚀 Iniciando generación del Excel...");
 
-    // 1. Obtener SOLO los empleados que están en "CursosCompletados"
+    // 1️⃣ Obtener SOLO los empleados que han completado cursos
     const cursosCompletadosSnapshot = await
     admin.firestore().collection("CursosCompletados").get();
     const empleadosCursos = cursosCompletadosSnapshot.docs.map((doc) => ({
@@ -117,11 +117,22 @@ exports.generarExcelCursos = functions.https.onRequest(async (req, res) => {
       fechas: doc.data().FechaCursoCompletado || [],
     }));
 
-    console.log(`Se encontraron ${
-      empleadosCursos.length} empleados con cursos completados.`);
+    console.log(`📌 Empleados con cursos completados: ${
+      empleadosCursos.length}`);
 
-    // 2. Obtener todos los cursos con su dependencia y trimestre
-    const cursosSnapshot = await admin.firestore().collection("Cursos").get();
+    // 2️⃣ Obtener los datos de los cursos completados
+    let cursosUnicos = new Set(); // Para evitar duplicados
+    empleadosCursos.forEach((empleado) => {
+      empleado.cursos.forEach((cursoId) => cursosUnicos.add(cursoId));
+    });
+
+    // Consultamos solo los cursos que fueron completados
+    const cursosSnapshot = await admin.firestore()
+        .collection("Cursos")
+        .where(admin.firestore.FieldPath.documentId(),
+            "in", Array.from(cursosUnicos))
+        .get();
+
     const cursos = cursosSnapshot.docs.map((doc) => ({
       id: doc.id,
       nombre: doc.data().NombreCurso || `CURSO_${doc.id}`,
@@ -129,138 +140,140 @@ exports.generarExcelCursos = functions.https.onRequest(async (req, res) => {
       trimestre: doc.data().Trimestre || "SIN TRIMESTRE",
     }));
 
-    // 3. Agrupar los cursos por Dependenciay Trimestre (sin repetir trimestres)
+    // Agrupar los cursos por Dependencia y Trimestre
     const dependencias = {};
     cursos.forEach((curso) => {
       if (!dependencias[curso.dependencia]) {
-        dependencias[curso.dependencia] = {};
-      }
-      if (!dependencias[curso.dependencia][curso.trimestre]) {
-        dependencias[curso.dependencia][curso.trimestre] = [];
+        dependencias[curso.dependencia] =
+        {"1": [], "2": [], "3": [], "4": []};
       }
       dependencias[curso.dependencia][curso.trimestre].push(curso);
     });
 
-    // 4. Crear el workbook y la hoja de Excel
+    console.log(`📌 Cursos organizados por Dependencia y Trimestre.`);
+
+    // 3️⃣ Crear el archivo Excel
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Reporte de Cursos");
+    const worksheet = workbook.addWorksheet("Reporte General");
 
-    // 5. Definir las columnas fijas: CUPO y NOMBRE (solo una vez)
+    // 4️⃣ Definir encabezados fijos
     let columnas = [
-      {header: "CUPO", key: "cupo", width: 12},
       {header: "NOMBRE", key: "nombre", width: 25},
+      {header: "CUPO", key: "cupo", width: 15},
     ];
-    let encabezadosDependencias = ["CUPO", "NOMBRE"];
+    let encabezadosDependencias = ["NOMBRE", "CUPO"];
     let encabezadosTrimestres = ["", ""];
-    // La última columna ocupada por "CUPO" y "NOMBRE"
+    let encabezadosCursos = ["", ""];
+
     let ultimaColumna = 2;
-    // 6. Agregar columnas dinámicas según las dependencias y trimestres
-    // 6. Agregar columnas dinámicas según las dependencias y trimestres
+
+    // 5️⃣ Agregar columnas
+    // dinámicas solo con los cursos que han sido completados
     Object.keys(dependencias).forEach((dependencia) => {
-      let primeraColumna = ultimaColumna + 1; // Donde empieza la Dependencia
-      let trimestresVistos = new Set(); // Para evitar repetir trimestres
+      let primeraColumna = ultimaColumna + 1;
+      let trimestres = Object.keys(dependencias[dependencia]);
 
-      Object.keys(dependencias[dependencia]).forEach((trimestre) => {
-        if (!trimestresVistos.has(trimestre)) {
-          // Solo agregar trimestres una vez
-          encabezadosDependencias.push(dependencia);
-          encabezadosTrimestres.push(`Trimestre ${trimestre}`);
-          columnas.push({
-            header: `Trimestre ${trimestre}`,
-            key: `depTrim_${dependencia}_${trimestre}`,
-            width: 30,
-          });
+      encabezadosDependencias.push(dependencia);
+      if (trimestres.length > 0) {
+        encabezadosDependencias = encabezadosDependencias.concat(
+            Array(Math.max(trimestres.length * 2 - 1, 0)).fill(""));
+      }
 
-          trimestresVistos.add(trimestre);
+
+      trimestres.forEach((trimestre) => {
+        encabezadosTrimestres.push(`Trimestre ${trimestre}`);
+        let cursosEnTrimestre = dependencias[
+            dependencia][trimestre].length || 0;
+        if (cursosEnTrimestre > 0) {
+          encabezadosTrimestres = encabezadosTrimestres.concat(
+              Array(Math.max(cursosEnTrimestre * 2 - 1, 0)).fill(""),
+          );
         }
+
+        dependencias[dependencia][trimestre].forEach((curso) => {
+          columnas.push({
+            header: curso.nombre, key: `curso_${curso.id}`, width: 20});
+          columnas.push({header: "Fecha", key: `fecha_${curso.id}`, width: 15});
+          encabezadosCursos.push(curso.nombre, "Fecha");
+        });
       });
 
-      let ultimaColumnaDependencia = primeraColumna + trimestresVistos.size - 1;
+      let ultimaColumnaDependencia = primeraColumna + trimestres.length * 2 - 1;
       worksheet.mergeCells(1, primeraColumna, 1, ultimaColumnaDependencia);
-      // Une la celda de la Dependencia
       ultimaColumna = ultimaColumnaDependencia;
     });
 
     worksheet.columns = columnas;
-    // 7. Agregar filas de encabezados (sin repetir "CUPO" y "NOMBRE")
+
+    // 6️⃣ Agregar encabezados
     worksheet.addRow(encabezadosDependencias);
     worksheet.addRow(encabezadosTrimestres);
+    worksheet.addRow(encabezadosCursos);
 
-    // Fusionar "CUPO" y "NOMBRE" en la fila de Dependencias
-    worksheet.mergeCells(1, 1, 2, 1); // Fusiona "CUPO"
-    worksheet.mergeCells(1, 2, 2, 2); // Fusiona "NOMBRE"
+    worksheet.mergeCells(1, 1, 3, 1);
+    worksheet.mergeCells(1, 2, 3, 2);
 
-    // 8. Procesar cada empleado que completó cursos
+    // 7️⃣ Procesar cada empleado y verificar cursos completados
     for (const empleado of empleadosCursos) {
-      console.log(`Procesando empleado con UID: ${empleado.uid}`);
+      console.log(`👤 Procesando empleado UID: ${empleado.uid}`);
 
-      let cupo = null;
+      let cupo = "NO ASIGNADO";
       let nombreEmpleado = "No encontrado";
 
+      // Obtener el cupo del usuario desde Firestore
       const userDoc = await
       admin.firestore().collection("User").doc(empleado.uid).get();
       if (userDoc.exists) {
         cupo = userDoc.data().CUPO;
       }
 
+      // Obtener el nombre del empleado desde Firestore - Empleados
       if (cupo) {
-        const empleadosSnapshot = await admin.firestore()
-            .collection("Empleados")
+        const empleadosSnapshot = await
+        admin.firestore().collection("Empleados")
             .where("CUPO", "==", cupo)
             .limit(1)
             .get();
-
         if (!empleadosSnapshot.empty) {
           nombreEmpleado = empleadosSnapshot.docs[0].data().Nombre;
         }
       }
 
-      const fila = {cupo: cupo || "NO ASIGNADO", nombre: nombreEmpleado};
+      const fila = {nombre: nombreEmpleado, cupo};
 
-      // Rellenar las celdas con los cursosagrupados por Dependencia y Trimestre
       Object.keys(dependencias).forEach((dependencia) => {
         Object.keys(dependencias[dependencia]).forEach((trimestre) => {
-          let cursosTexto = "";
-
           dependencias[dependencia][trimestre].forEach((curso) => {
             const index = empleado.cursos.indexOf(curso.id);
-            if (index !== -1) {
-              const fechaTimestamp = empleado.fechas[index];
-              let fechaFormateada = "NO COMPLETADO";
-              if (fechaTimestamp && fechaTimestamp.toDate) {
-                fechaFormateada = fechaTimestamp.toDate().toLocaleDateString();
-              }
-              cursosTexto += `${curso.nombre} (${fechaFormateada})\n`;
-            }
-          });
+            let fechaFormateada = "NO COMPLETADO";
 
-          fila[`depTrim_${dependencia}_${
-            trimestre}`] = cursosTexto || "NO COMPLETADO";
+            if (index !== -1 && empleado.fechas[
+                index] && empleado.fechas[index].toDate) {
+              fechaFormateada = empleado.fechas[
+                  index].toDate().toLocaleDateString();
+            }
+
+            fila[`curso_${curso.id}`] = "✅";
+            fila[`fecha_${curso.id}`] = fechaFormateada;
+          });
         });
       });
 
       worksheet.addRow(fila);
     }
 
-    // 9. Guardar el workbook en un archivo temporal
-    const tmpFilePath = path.join(
-        os.tmpdir(), `ReporteCursos_${Date.now()}.xlsx`);
+    // Guardar y subir a Firebase Storage
+    const tmpFilePath = path.join(os.tmpdir(),
+        `ReporteGeneral_${Date.now()}.xlsx`);
     await workbook.xlsx.writeFile(tmpFilePath);
-
-    // 10. Subir el archivo a Cloud Storage
-    const bucket = admin.storage().bucket();
-    const destination = `excels/${path.basename(tmpFilePath)}`;
+    const destination = `excels/ReporteGeneral.xlsx`;
     await bucket.upload(tmpFilePath, {destination});
 
-    // 11. Generar URL firmada
-    const file = bucket.file(destination);
-    const expires = Date.now() + 60 * 60 * 1000;
-    const [url] = await file.getSignedUrl({action: "read", expires});
-
-    fs.unlinkSync(tmpFilePath);
-    res.status(200).json({url});
+    res.status(200).json({url: await
+    bucket.file(destination).getSignedUrl({action:
+            "read", expires: Date.now() + 60 * 60 * 1000})});
   } catch (error) {
-    console.error("Error generando el Excel:", error);
+    console.error("❌ Error generando el Excel:", error);
     res.status(500).json({error: error.message});
   }
 });
