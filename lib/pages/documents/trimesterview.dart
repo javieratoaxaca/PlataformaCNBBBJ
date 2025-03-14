@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:plataformacnbbbjo/components/formPatrts/actions_form_check.dart';
+import 'package:plataformacnbbbjo/components/formPatrts/custom_snackbar.dart';
 import 'package:plataformacnbbbjo/components/formPatrts/my_button.dart';
 import 'package:plataformacnbbbjo/dataConst/constand.dart';
 import 'package:plataformacnbbbjo/pages/documents/dependenciesview.dart';
 import 'package:plataformacnbbbjo/pages/documents/firebaseservice.dart';
+import 'package:plataformacnbbbjo/service/report_excel';
 
 class TrimesterView extends StatefulWidget {
   const TrimesterView({super.key});
@@ -133,7 +135,17 @@ class _TrimesterViewState extends State<TrimesterView> {
                 ),
                  floatingActionButton: FloatingActionButton.extended(
         onPressed: ()async{
-            await _firebaseService.descargarExcel(context);
+          try {
+            await generarExcelCursosCompletados();
+            if(context.mounted) {
+              showCustomSnackBar(context, 'Archivo descargado correctamente', greenColorLight);
+            }
+          }
+          catch(e) {
+            if(context.mounted) {
+              showCustomSnackBar(context, 'Error: ', Colors.red);
+            }
+          }
         },
         
         icon: const Icon(Icons.download),
