@@ -169,7 +169,7 @@ class CourseCard extends StatelessWidget {
               children: [
                 Image.asset(
                   imagePath,
-                  height: MediaQuery.of(context).size.width < 400 ? 80 : 100,
+                  height: MediaQuery.of(context).size.width < 600 ? 80 : 100,
                   width: double.infinity,
                   fit: BoxFit.cover,
                 ),
