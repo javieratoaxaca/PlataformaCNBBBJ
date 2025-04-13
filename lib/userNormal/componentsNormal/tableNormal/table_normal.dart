@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:plataformacnbbbjo/userNormal/componentsNormal/tableNormal/paginated_table_normal.dart';
-import 'package:plataformacnbbbjo/userNormal/componentsNormal/tableNormal/table_data_example_normal.dart';
 import 'package:plataformacnbbbjo/userNormal/serviceuser/paginated_table_service.dart';
 import 'package:plataformacnbbbjo/util/responsive.dart';
 
@@ -67,21 +67,14 @@ class _TableNormalState extends State<TableNormal> {
             Text(
               'Aún no has completado un curso',
               style: TextStyle(
-                  fontSize: responsiveFontSize(context, 18),
+                  fontSize: responsiveFontSize(context, 20),
                   fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10.0),
-            SizedBox(
-              width: double.infinity,
-              child: PaginatedTableNormal(
-                columns: TableDataExampleNormal.getColumns(),
-                rows: TableDataExampleNormal.getRows(),
-                isLoading: false,
-              ),
-            )
+            Center(child: Icon(Icons.table_view_outlined),)
           ] else ...[
             Text(
-              'Mis cursos completados',
+              'Mis cursos completados', 
               style: TextStyle(
                   fontSize: responsiveFontSize(context, 20),
                   fontWeight: FontWeight.bold),
