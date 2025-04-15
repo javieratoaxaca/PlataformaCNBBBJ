@@ -4,7 +4,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 class FirebaseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Obtener cursos pendientes de un usuario
+  //b Obtiene los cursos pendientes de un usuario considerando su CUPO y los cursos completados previamente.
   Future<List<Map<String, dynamic>>> obtenerCursosPendientes(String userId, String cupo) async {
   try {
     // Obtener los IDs de los cursos completados
@@ -131,7 +131,9 @@ if (idSare != null) {
     return [];
   }
 }
-   Future<void> deleteNotification(String notificationId) async {
+
+  // Marca una notificación como inactiva en la base de datos.
+  Future<void> deleteNotification(String notificationId) async {
   try {
     await _firestore.collection('notifications').doc(notificationId).update({
       'statusUser': 'inactivo' // Cambia el estado a inactivo
@@ -158,6 +160,7 @@ if (idSare != null) {
   }
 }
 
+  // Obtiene las notificaciones activas de un usuario en tiempo real.
   Stream<QuerySnapshot> getUserNotifications(String userId) {
   try {
     return _firestore
@@ -191,6 +194,7 @@ if (idSare != null) {
   }
 }
 
+// Retorna el número de notificaciones activas del usuario en tiempo real.
  Stream<QuerySnapshot> getUserNotificationsCount(String userId) {
   try {
     return _firestore
