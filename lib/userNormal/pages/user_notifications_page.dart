@@ -7,10 +7,14 @@ import 'package:plataformacnbbbjo/userNormal/serviceuser/firebase_service.dart';
 import 'package:plataformacnbbbjo/util/responsive.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-
+/// Página que muestra las notificaciones del usuario autenticado.
+/// Las notificaciones provienen de Firestore y pueden incluir estados
+/// como "Aprobado", "Rechazado" o "Pendiente", además de un mensaje
+/// del administrador. El usuario puede eliminar notificaciones desde la interfaz.
 class UserNotificationsPage extends StatelessWidget {
+  /// Servicio que permite obtener y eliminar notificaciones del usuario.
   final FirebaseService _firebaseService = FirebaseService();
-
+  /// Constructor de la clase `UserNotificationsPage`.
   UserNotificationsPage({super.key});
 
   @override
@@ -145,7 +149,9 @@ class UserNotificationsPage extends StatelessWidget {
     );
   }
 
-  ///**Confirmar eliminación de notificación**
+  /// Muestra un cuadro de diálogo para confirmar la eliminación de una notificación.
+  /// Si el usuario acepta, se llama al método de `FirebaseService` para eliminar
+  /// la notificación de Firestore.
   void _confirmDelete(BuildContext context, String notificationId) {
     showDialog(
       context: context,

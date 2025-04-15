@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:plataformacnbbbjo/components/formPatrts/actions_form_check.dart';
 import 'package:plataformacnbbbjo/components/formPatrts/custom_snackbar.dart';
+import 'package:plataformacnbbbjo/components/formPatrts/my_button.dart';
 import 'package:plataformacnbbbjo/dataConst/constand.dart';
 import 'package:plataformacnbbbjo/pages/notification/notification_service.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:url_launcher/url_launcher.dart';
-import 'package:http/http.dart' as http;
-
+//import 'package:http/http.dart' as http;
+//Clase necesaria para utilzar las notificaciones de manera dinamica 
 class NotificationNew extends StatelessWidget {
   final NotificationService _notificationService = NotificationService();
 
@@ -135,57 +136,35 @@ class NotificationNew extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            onTap: () async {
-                              final pdfUrl = notification['pdfUrl'];
-                              _notificationService.marcarNotificacionLeida(notification.id);
-                              if (pdfUrl != null && pdfUrl.isNotEmpty) {
-                                 try {
-      //verificar si el archivo existe en Storage con una peticion head
-      final response = await http.head(Uri.parse(pdfUrl));
+            //Toque dinamico para interactuar
+            onTap: () async {
+            //se busca la url del archivo
+            final pdfUrl = notification['pdfUrl'];
+            _notificationService.marcarNotificacionLeida(notification.id);
 
-      if (response.statusCode == 200) {
-        // El archivo existe, abrirlo en el navegador
-        if (await canLaunchUrl(Uri.parse(pdfUrl))) {
-          await launchUrl(Uri.parse(pdfUrl), mode: LaunchMode.externalApplication);
-        } else {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('No se puede abrir el archivo PDF')),
-            );
-          }
-        }
-      } else if (response.statusCode == 404) {
-        // El archivo ya no se encuentra en el Storage
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('El archivo PDF ya no está disponible en el servidor')),
-          );
-        }
-      } else {
-        // Otro error de archivo
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Ocurrió un error al verificar el archivo')),
-          );
-        }
-      }
-    } catch (e) {
-      // Error al hacer la petición HTTP
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo verificar el archivo. Revisa tu conexión a internet.')),
-        );
-      }
-    }
-  } else {
-    // Si no hay URL en la notificación, mostrar un mensaje
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No hay un archivo PDF asociado a esta notificación')),
-      );
-    }
-                              }
-                            },
+            if (pdfUrl != null && pdfUrl.isNotEmpty) {
+              try {
+                //se verifica si existe el archivo en el storage
+                if (await _notificationService.verificarArchivo(pdfUrl)) {
+                  final uri = Uri.parse(pdfUrl);
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                } else {
+                  _mostrarDialogoError(context, "El archivo PDF no existe en el servidor.");
+                }
+              } catch (e) {
+                debugPrint('Error al intentar abrir el archivo: $e');
+
+                // Verifica si el error proviene de un código 404 (Not Found)
+                if (e.toString().contains("404")) {
+                  _mostrarDialogoError(context, 'El archivo PDF no fue encontrado en el servidor.');
+                } else {
+                  _mostrarDialogoError(context, 'Error al abrir el archivo PDF.');
+                }
+              }
+            } else {
+              _mostrarDialogoError(context, 'No hay un archivo PDF asociado a esta notificación.');
+            }
+          }                   
                           );
                         },
                       );
@@ -200,6 +179,7 @@ class NotificationNew extends StatelessWidget {
     );
   }
 
+  //Funcion para confirmar el curso completado y un mensaje de advertencia al administrador
   void _confirmarCompletado(BuildContext context, String userId, String cursoId, String evidenciaUrl, String notificationId) {
     showDialog(
       context: context,
@@ -233,6 +213,7 @@ class NotificationNew extends StatelessWidget {
     );
   }
 
+  //Funcion que se llama a para poder rechazar una evidencia y mandar una advertencia al administrador
   void _rechazarEvidencia(BuildContext context, String userId, String notificationId, String filePath) {
     showDialog(
       context: context,
@@ -264,4 +245,25 @@ class NotificationNew extends StatelessWidget {
       ),
     );
   }
+
+  // Función para mostrar diálogos de error
+  void _mostrarDialogoError(BuildContext context, String mensaje) {
+  if (!context.mounted) return;
+
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Error'),
+      content: Text(mensaje),
+      actions: [
+        MyButton(
+          text: "Aceptar",
+          icon: Icon(Icons.check_circle_outline),
+          buttonColor: greenColorLight,
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
+    ),
+  );
+}
 }

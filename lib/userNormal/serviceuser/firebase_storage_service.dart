@@ -1,3 +1,6 @@
+// Esta clase administra la carga de archivos PDF a Firebase Storage 
+// verificando permisos y existencia previa en Firestore. Además, genera 
+//registros de notificaciones sobre la subida de archivos.
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,6 +18,7 @@ class FirebaseStorageService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  // Permite a un usuario subir un archivo PDF a Firebase Storage, generando una notificación en Firestore sobre la subida.
   Future<void> subirArchivo({
     required BuildContext context,
     required String trimester,
@@ -43,21 +47,22 @@ class FirebaseStorageService {
       );
       return;
     }
-
+    // Se consulta Firestore para evitar archivos duplicados.
     String fileName = basename(result.files.single.name);
     String year = DateFormat('yyyy').format(DateTime.now());
-
+    // Se define la estructura de carpetas en Firebase Storage.
     String storagePath = '$year/$trimester/$dependency/$course/';
     if (subCourse != null) storagePath += '$subCourse/';
     storagePath += fileName;
-
+    // Se sube el archivo a Firebase Storage, monitoreando el progreso.
     final storageRef = _storage.ref().child(storagePath);
     final metadata = SettableMetadata(contentType: 'application/pdf');
 
     try {
       User? user = _auth.currentUser;
       if (user == null) throw Exception("Usuario no autenticado");
-
+      
+      // Se crea un documento en notifications con la información del archivo subido.
        QuerySnapshot querySnapshot = await _firestore
         .collection('notifications')
         .where('uid', isEqualTo: user.uid)

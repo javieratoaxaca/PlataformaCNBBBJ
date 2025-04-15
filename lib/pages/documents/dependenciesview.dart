@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:plataformacnbbbjo/pages/documents/coursesview.dart';
 import 'package:plataformacnbbbjo/pages/documents/firebaseservice.dart';
 
-
+// [DependenciesView] muestra una lista de dependencias disponibles
+// para un trimestre específico.
+// Al seleccionar una dependencia, el usuario es redirigido a la vista
+// [CoursesView], donde puede consultar los cursos relacionados a dicha dependencia.
 class DependenciesView extends StatefulWidget {
-  final String trimester;
+  final String trimester;  /// Trimestre seleccionado para filtrar las dependencias.
+
+  // Constructor de [DependenciesView].
   const DependenciesView({super.key, required this.trimester});
 
   @override
@@ -12,21 +17,31 @@ class DependenciesView extends StatefulWidget {
 }
 
 class _DependenciesViewState extends State<DependenciesView> {
+   /// Instancia del servicio de Firebase que gestiona la obtención de datos.
   final FirebaseService _firebaseService = FirebaseService();
+  /// Lista de dependencias obtenidas desde Firebase. 
   List<Map<String, dynamic>> dependencies = [];
+  /// Indica si los datos aún se están cargando.
   bool isLoading = true;
 
+  /// Método que se llama automáticamente al iniciar el widget.
+  /// Se encarga de iniciar la carga de dependencias.
   @override
   void initState() {
     super.initState();
     _loadDependencies();
   }
 
+  /// Carga las dependencias desde Firebase según el trimestre actual.
+  /// Al finalizar la carga, actualiza el estado para mostrar los datos.
   Future<void> _loadDependencies() async {
     dependencies = await _firebaseService.getDependencies(widget.trimester);
     setState(() => isLoading = false);
   }
 
+  /// Construye la interfaz de usuario para mostrar las dependencias.
+  /// Muestra un indicador de carga mientras se obtienen los datos, un mensaje
+  /// si no hay dependencias, o una cuadrícula de tarjetas en caso contrario.
   @override
   Widget build(BuildContext context) {
     return Scaffold(

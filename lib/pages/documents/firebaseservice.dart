@@ -13,7 +13,9 @@ class FirebaseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  // Obtener trimestres únicos
+  // Obtiene una lista de trimestres únicos desde la colección 'Cursos' en Firestore.
+  // Retorna una lista de cadenas con los nombres de los trimestres ordenados alfabéticamente.
+  // Captura y reporta errores con Sentry.
   Future<List<String>> getTrimesters() async {
   try {
     QuerySnapshot snapshot = await _firestore.collection('Cursos').get();
@@ -53,7 +55,10 @@ class FirebaseService {
 }
 
 
-  // Obtener dependencias únicas por trimestre
+  // Obtiene una lista de dependencias únicas asociadas a un trimestre específico.
+  // [trimester] Trimestre seleccionado.
+  // Retorna una lista de mapas que contienen `IdDependencia` y `NombreDependencia`.
+  // Captura y reporta errores con Sentry.
  Future<List<Map<String, dynamic>>> getDependencies(String trimester) async {
   try {
     QuerySnapshot snapshot = await _firestore
@@ -114,7 +119,10 @@ class FirebaseService {
   }
 }
 
-  // Obtener cursos por trimestre y dependencia
+  // Retorna un stream en tiempo real de los cursos que pertenecen a un trimestre y dependencia específicos.
+  // [trimester] Trimestre seleccionado.
+  // [dependecyId] ID de la dependencia.
+  // Captura y reporta errores con Sentry.
   Stream<QuerySnapshot> getCourses(String trimester, String dependecyId) {
     try {
       return _firestore
@@ -155,7 +163,12 @@ class FirebaseService {
     }
   }
 
-  // Obtener archivos de un curso en Firebase Storage
+  // Obtiene los archivos almacenados en Firebase Storage para un curso específico.
+  // [trimester] Trimestre del curso.
+  // [dependency] ID de la dependencia del curso.
+  // [courseName] Nombre del curso.
+  // Retorna un mapa con nombre de archivo como clave y su URL de descarga como valor.
+  // Captura y reporta errores con Sentry.
   Future<Map<String, String>> getCourseFiles(
       String trimester, String dependency, String courseName) async {
     try {
@@ -206,7 +219,9 @@ class FirebaseService {
     }
   }
 
-  // Descargar archivo
+  // Abre una URL de archivo para descarga en el navegador externo del dispositivo.
+  // [fileUrl] URL del archivo a descargar.
+  // Captura y reporta errores con Sentry si la apertura falla.
   Future<void> downloadFile(String fileUrl) async {
     try {
       final Uri uri = Uri.parse(fileUrl);
@@ -230,6 +245,11 @@ class FirebaseService {
     }
   }
 
+// Descarga un archivo ZIP con todos los archivos de un trimestre desde una función de Firebase.
+// [context] Contexto de la interfaz para mostrar diálogos.
+// [trimestre] Trimestre seleccionado.
+// Muestra diálogos en caso de errores o si no hay archivos disponibles.
+// Captura errores y los reporta con Sentry.
  Future<void> descargarZIP(BuildContext context, String trimestre) async {
   final uri = Uri.parse(
       "https://us-central1-expedientesems.cloudfunctions.net/generarZipPorTrimestre?trimestre=$trimestre");
@@ -275,7 +295,11 @@ class FirebaseService {
 }
 
 
-
+// Elimina todos los archivos almacenados en Firebase Storage de un trimestre mediante una función en la nube.
+// [context] Contexto de la interfaz para mostrar diálogos.
+// [trimestre] Trimestre seleccionado.
+// Muestra mensajes de éxito o error según el estado de la operación.
+// Captura errores y los reporta con Sentry.
 Future<void> eliminarArchivosTrimestre(BuildContext context, String trimestre) async {
   final uri = Uri.parse(
       "https://us-central1-expedientesems.cloudfunctions.net/eliminarArchivosPorTrimestre?trimestre=$trimestre");
@@ -306,6 +330,11 @@ Future<void> eliminarArchivosTrimestre(BuildContext context, String trimestre) a
     );
   }
 }
+
+// Muestra un cuadro de diálogo personalizado con título y mensaje en la interfaz.
+// [context] Contexto donde se mostrará el diálogo.
+// [titulo] Título del cuadro de diálogo.
+// [mensaje] Contenido del mensaje mostrado.
 void mostrarDialogo(BuildContext context, String titulo, String mensaje) {
   if (!context.mounted) return;
 
@@ -322,6 +351,10 @@ void mostrarDialogo(BuildContext context, String titulo, String mensaje) {
     },
   );
 }
+
+// Verifica si existen archivos almacenados en Firebase Storage para un trimestre.
+// [trimestre] Trimestre a consultar.
+// Retorna `true` si existen archivos, `false` en caso contrario.
 Future<bool> verificarArchivosTrimestre(String trimestre) async {
   final uri = Uri.parse(
       "https://us-central1-expedientesems.cloudfunctions.net/eliminarArchivosPorTrimestre?trimestre=$trimestre");
@@ -336,6 +369,11 @@ Future<bool> verificarArchivosTrimestre(String trimestre) async {
     return false; // Error en la solicitud, asumimos que no hay archivos
   }
 }
+
+// Descarga un archivo Excel con información de los cursos desde una función en la nube.
+// [context] Contexto para mostrar diálogos informativos.
+// Muestra mensajes en caso de éxito, error o si no hay archivos disponibles.
+// Captura errores y los reporta con Sentry.
 Future<void> descargarExcel(BuildContext context) async {
   final uri = Uri.parse(
       "https://us-central1-expedientesems.cloudfunctions.net/generarExcelCursos");
