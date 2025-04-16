@@ -124,6 +124,7 @@ class _DynamicCourseSelectionPageState extends State<DynamicCourseSelectionPage>
                           return CourseCard(
                             courseName: curso['NombreCurso'],
                             trimester: curso['Trimestre'],
+                            dependecy: curso['Dependencia'],
                             onTap: () {
                               Navigator.push(
                                 context,
@@ -155,6 +156,8 @@ class CourseCard extends StatelessWidget {
   final String courseName;
   /// Trimestre en que se imparte el curso.
   final String trimester;
+  /// Nombre de la dependencia a la que pertenece el curso
+  final String dependecy;
   /// Fecha de inicio del curso (opcional).
   final String? startDate;
   /// Acción que se ejecuta cuando el usuario toca la tarjeta.
@@ -165,6 +168,7 @@ class CourseCard extends StatelessWidget {
     super.key,
     required this.courseName,
     required this.trimester,
+    required this.dependecy,
     this.startDate,
     required this.onTap,
   });
@@ -192,7 +196,8 @@ class CourseCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  courseName,
+                  //Nombre del curso en la tarjeta
+                  courseName, 
                   style: TextStyle(
                     fontSize: responsiveFontSize(context, 15),
                     fontWeight: FontWeight.bold,
@@ -200,8 +205,15 @@ class CourseCard extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 10),
+                /// Nombre del trimestre en la tarjeta
                 Text(
                   'Trimestre: $trimester',
+                  style: TextStyle(fontSize: responsiveFontSize(context, 14)),
+                  textAlign: TextAlign.center,
+                ),
+                /// Nombre de la dependencia en la tarjeta
+                Text(
+                  'Dependencia: $dependecy',
                   style: TextStyle(fontSize: responsiveFontSize(context, 14)),
                   textAlign: TextAlign.center,
                 ),
