@@ -84,51 +84,80 @@ class _CursosNormalState extends State<CursosNormal> {
   /// Incluye el mensaje descriptivo, la barra de progreso (si aplica)
   /// y un botón para subir el archivo PDF.
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.subCourse != null
-            ? 'Subir Documento: ${widget.course} > ${widget.subCourse}'
-            : 'Subir Documento: ${widget.course}'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              widget.subCourse != null
-                  ? 'Sube la evidencia del curso en formato PDF para ${widget.trimester}, Dependencia: ${widget.dependecy}.'
-                  : 'Sube un documento PDF para el curso seleccionado (${widget.course}). \n El nombre del archivo debe ser: Constancia_NombreCurso_ApellidoPaterno_ApellidoMaterno_Nombres_Adscripcion',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 18),
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: Text(widget.subCourse != null
+          ? 'Subir Documento: ${widget.course} > ${widget.subCourse}'
+          : 'Subir Documento: ${widget.course}'),
+    ),
+    body: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Card(
+            color: Colors.yellow[100],
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: pantone872c, width: 1.5),
             ),
-            const SizedBox(height: 20),
-
-            // Barra de progreso
-            if (isUploading)
-              Column(
-                children: [
-                  LinearProgressIndicator(value: uploadProgress),
-                  const SizedBox(height: 10),
-                  Text('${(uploadProgress * 100).toStringAsFixed(0)}%'),
-                ],
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: RichText(
+                textAlign: TextAlign.left,
+                text: TextSpan(
+                  style: const TextStyle(fontSize: 16, color: Colors.black),
+                  children: [
+                    TextSpan(
+                      text: widget.subCourse != null
+                          ? 'Sube la evidencia del curso en formato PDF para ${widget.trimester}, Dependencia: ${widget.dependecy}.\n\n'
+                          : 'Sube un documento PDF para el curso seleccionado (${widget.course}).\n\n',
+                    ),
+                    const TextSpan(
+                      text: '📄 El nombre del archivo debe ser:\n',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const TextSpan(
+                      text: 'Constancia_NombreCurso_ApellidoPaterno_ApellidoMaterno_Nombre(s)_Oaxaca',
+                      style: TextStyle(
+                        backgroundColor: Color.fromARGB(255, 155, 34, 71),
+                        color: light,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-
-            const SizedBox(height: 20),
-
-            // Botón de subida
-            ElevatedButton.icon(
-             
-              onPressed: isUploading ? null : _uploadPDF, // Deshabilita si está subiendo
-              icon: const Icon(Icons.upload_file, color: greenColorLight,),     
-              label: const Text('Seleccionar y Subir PDF',
-              style: TextStyle(
-              color: greenColorLight, ),
             ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Barra de progreso
+          if (isUploading)
+            Column(
+              children: [
+                LinearProgressIndicator(value: uploadProgress),
+                const SizedBox(height: 10),
+                Text('${(uploadProgress * 100).toStringAsFixed(0)}%'),
+              ],
             ),
-          ],
-        ),
+
+          const SizedBox(height: 20),
+
+          // Botón de subida
+          ElevatedButton.icon(
+            onPressed: isUploading ? null : _uploadPDF,
+            icon: const Icon(Icons.upload_file, color: greenColorLight),
+            label: const Text(
+              'Seleccionar y Subir PDF',
+              style: TextStyle(color: greenColorLight),
+            ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 }
