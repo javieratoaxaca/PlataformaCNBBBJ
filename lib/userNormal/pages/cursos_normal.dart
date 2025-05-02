@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:plataformacnbbbjo/dataConst/constand.dart';
 import 'package:plataformacnbbbjo/userNormal/serviceuser/firebase_storage_service.dart';
+import 'package:plataformacnbbbjo/util/responsive.dart';
 
 /// Pantalla donde el usuario puede subir un documento PDF como evidencia
 /// de haber completado un curso o subcurso específico.
@@ -106,9 +107,9 @@ Widget build(BuildContext context) {
               side: const BorderSide(color: pantone872c, width: 1.5),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding:  EdgeInsets.all(12.0),
               child: RichText(
-                textAlign: TextAlign.left,
+                textAlign: TextAlign.center,
                 text: TextSpan(
                   style: const TextStyle(fontSize: 16, color: Colors.black),
                   children: [
@@ -121,12 +122,14 @@ Widget build(BuildContext context) {
                       text: '📄 El nombre del archivo debe ser:\n',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
+                    
                     TextSpan(
                       text: widget.nomenclatura,
-                      style: const TextStyle(
+                      style: TextStyle(
                         backgroundColor: Color.fromARGB(255, 155, 34, 71),
                         color: light,
                         fontWeight: FontWeight.w500,
+                        fontSize: responsiveFontSize(context, 16)
                       ),
                     ),
                   ],
