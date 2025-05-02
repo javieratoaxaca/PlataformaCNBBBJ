@@ -125,6 +125,7 @@ class _DynamicCourseSelectionPageState extends State<DynamicCourseSelectionPage>
                             courseName: curso['NombreCurso'],
                             trimester: curso['Trimestre'],
                             dependecy: curso['Dependencia'],
+                            nomenclatura: curso['Nomenclatura'],
                             onTap: () {
                               Navigator.push(
                                 context,
@@ -135,6 +136,7 @@ class _DynamicCourseSelectionPageState extends State<DynamicCourseSelectionPage>
                                     trimester: curso['Trimestre'],
                                     dependecy: curso['Dependencia'],
                                     idCurso: curso['IdCurso'],
+                                    nomenclatura: curso['Nomenclatura']
                                   ),
                                 ),
                               );
@@ -158,6 +160,8 @@ class CourseCard extends StatelessWidget {
   final String trimester;
   /// Nombre de la dependencia a la que pertenece el curso
   final String dependecy;
+  //estructura para nombrar la evidencia del curso
+  final String nomenclatura;
   /// Fecha de inicio del curso (opcional).
   final String? startDate;
   /// Acción que se ejecuta cuando el usuario toca la tarjeta.
@@ -169,6 +173,7 @@ class CourseCard extends StatelessWidget {
     required this.courseName,
     required this.trimester,
     required this.dependecy,
+    required this.nomenclatura,
     this.startDate,
     required this.onTap,
   });

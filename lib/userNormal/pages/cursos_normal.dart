@@ -18,6 +18,7 @@ class CursosNormal extends StatefulWidget {
   final String dependecy;
   /// ID único del curso.
   final String idCurso;
+  final String nomenclatura;
 
   /// Constructor del widget `CursosNormal`.
   const CursosNormal({
@@ -26,7 +27,8 @@ class CursosNormal extends StatefulWidget {
     required this.trimester,
     required this.dependecy,
     required this.idCurso,
-    super.key,
+    required this.nomenclatura,
+    super.key, 
   });
 
   @override
@@ -67,6 +69,7 @@ class _CursosNormalState extends State<CursosNormal> {
       dependency: widget.dependecy,
       course: widget.course,
       idCurso: widget.idCurso,
+      nomenclatura: widget.nomenclatura,
       subCourse: widget.subCourse,
       onProgress: (progress) {
         setState(() {
@@ -118,9 +121,9 @@ Widget build(BuildContext context) {
                       text: '📄 El nombre del archivo debe ser:\n',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    const TextSpan(
-                      text: 'Constancia_NombreCurso_ApellidoPaterno_ApellidoMaterno_Nombre(s)_Oaxaca',
-                      style: TextStyle(
+                    TextSpan(
+                      text: widget.nomenclatura,
+                      style: const TextStyle(
                         backgroundColor: Color.fromARGB(255, 155, 34, 71),
                         color: light,
                         fontWeight: FontWeight.w500,

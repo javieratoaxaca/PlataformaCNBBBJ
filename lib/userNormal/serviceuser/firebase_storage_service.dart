@@ -24,6 +24,7 @@ class FirebaseStorageService {
     required String trimester,
     required String dependency,
     required String course,
+    required String nomenclatura,
     required String idCurso,
     String? subCourse,
     required Function(double) onProgress,
