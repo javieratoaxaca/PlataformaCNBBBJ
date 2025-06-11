@@ -192,7 +192,7 @@ Future<bool> tieneArchivoPendiente({
       .collection('notifications')
       .where('uid', isEqualTo: uid)
       .where('IdCurso', isEqualTo: idCurso)
-      .where('estado', isEqualTo: 'pendiente')
+      .where('estado', whereIn: ['Aprobado', 'pendiente'])
       .get();
 
   return snapshot.docs.isNotEmpty;

@@ -16,6 +16,7 @@ Future<void> generarExcelCursosCompletados() async {
 
   // Recoger todas las dependencias únicas
   for (var doc in cursosCompletadosSnapshot.docs) {
+
     List<String> idCursos = List<String>.from(doc['IdCursosCompletados']);
 
     for (String cursoId in idCursos) {

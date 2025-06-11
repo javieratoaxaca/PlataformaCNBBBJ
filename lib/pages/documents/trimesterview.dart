@@ -153,10 +153,11 @@ class _TrimesterViewState extends State<TrimesterView> {
             try {
               await generarExcelCursosCompletados();
               if (!mounted) return;
-              if(context.mounted) {showCustomSnackBar(context, 'Archivo descargado correctamente', greenColorLight);}
+              showCustomSnackBar(context, 'Archivo descargado correctamente', greenColorLight);
             } catch (e) {
               if (!mounted) return;
-              if(context.mounted) {showCustomSnackBar(context, 'Error al descargar el archivo', Colors.red);}
+              showCustomSnackBar(context, 'Error: $e', Colors.red);
+              print(e);
             }
           },
           icon: const Icon(Icons.download),
