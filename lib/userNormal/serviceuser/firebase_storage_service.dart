@@ -1,3 +1,6 @@
+// Esta clase administra la carga de archivos PDF a Firebase Storage 
+// verificando permisos y existencia previa en Firestore. Además, genera 
+//registros de notificaciones sobre la subida de archivos.
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,11 +18,13 @@ class FirebaseStorageService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  // Permite a un usuario subir un archivo PDF a Firebase Storage, generando una notificación en Firestore sobre la subida.
   Future<void> subirArchivo({
     required BuildContext context,
     required String trimester,
     required String dependency,
     required String course,
+    required String nomenclatura,
     required String idCurso,
     String? subCourse,
     required Function(double) onProgress,
@@ -43,21 +48,22 @@ class FirebaseStorageService {
       );
       return;
     }
-
+    // Se consulta Firestore para evitar archivos duplicados.
     String fileName = basename(result.files.single.name);
     String year = DateFormat('yyyy').format(DateTime.now());
-
+    // Se define la estructura de carpetas en Firebase Storage.
     String storagePath = '$year/$trimester/$dependency/$course/';
     if (subCourse != null) storagePath += '$subCourse/';
     storagePath += fileName;
-
+    // Se sube el archivo a Firebase Storage, monitoreando el progreso.
     final storageRef = _storage.ref().child(storagePath);
     final metadata = SettableMetadata(contentType: 'application/pdf');
 
     try {
       User? user = _auth.currentUser;
       if (user == null) throw Exception("Usuario no autenticado");
-
+      
+      // Se crea un documento en notifications con la información del archivo subido.
        QuerySnapshot querySnapshot = await _firestore
         .collection('notifications')
         .where('uid', isEqualTo: user.uid)
@@ -150,7 +156,12 @@ class FirebaseStorageService {
           title: Text('Éxito'),
           content: Text('El archivo se subió correctamente.'),
           actions: [
-            MyButton(text: "Aceptar", icon: Icon(Icons.check_circle_outline), buttonColor: greenColorLight, onPressed: () => Navigator.pop(context),)
+            MyButton(text: "Aceptar", icon: Icon(Icons.check_circle_outline), 
+            buttonColor: greenColorLight, 
+            onPressed: () {
+            Navigator.pop(context); // Cierra el diálogo
+            Navigator.pop(context); // Cierra CursosNormal
+            },)
 
           ],
         ),
@@ -163,10 +174,28 @@ class FirebaseStorageService {
           title: Text('Error al subir'),
           content: Text('Error al subir el archivo: $e'),
           actions: [
-            MyButton(text: "Aceptar", icon: Icon(Icons.check_circle_outline), buttonColor: greenColorLight, onPressed: () => Navigator.pop(context),)
+            MyButton(text: "Aceptar", icon: Icon(Icons.check_circle_outline), 
+            buttonColor: greenColorLight, 
+            onPressed: () => Navigator.pop(context),)
             ],
         ),
       );
     }
   }
+
+  //Metodo para verificar si el curso esta en revisión
+Future<bool> tieneArchivoPendiente({
+  required String idCurso,
+  required String uid,
+}) async {
+  final snapshot = await _firestore
+      .collection('notifications')
+      .where('uid', isEqualTo: uid)
+      .where('IdCurso', isEqualTo: idCurso)
+      .where('estado', isEqualTo: 'pendiente')
+      .get();
+
+  return snapshot.docs.isNotEmpty;
+}
+
 }

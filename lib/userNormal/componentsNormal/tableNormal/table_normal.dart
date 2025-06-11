@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:plataformacnbbbjo/userNormal/componentsNormal/tableNormal/paginated_table_normal.dart';
 import 'package:plataformacnbbbjo/userNormal/componentsNormal/tableNormal/table_data_example_normal.dart';
 import 'package:plataformacnbbbjo/userNormal/serviceuser/paginated_table_service.dart';
@@ -58,11 +59,7 @@ class _TableNormalState extends State<TableNormal> {
             const SizedBox(height: 10.0),
             SizedBox(
               width: double.infinity,
-              child: PaginatedTableNormal(
-                columns: TableDataExampleNormal.getColumns(),
-                rows: TableDataExampleNormal.getRows(),
-                isLoading: false,
-              ),
+              child: Icon(Icons.insert_emoticon_sharp),
             )
           ] else ...[
             Text(
