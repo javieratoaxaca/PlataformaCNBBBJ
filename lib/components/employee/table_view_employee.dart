@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:plataformacnbbbjo/components/employee/uploadDocument.dart';
 import 'package:plataformacnbbbjo/components/table/my_paginated_table.dart';
 import 'package:plataformacnbbbjo/providers/edit_provider.dart';
 import 'package:plataformacnbbbjo/service/employeeService/database_methods_employee.dart';
@@ -149,6 +150,24 @@ class TableViewEmployee extends StatelessWidget {
                   Icons.engineering,
                   color: Colors.blue,
                 ),
+                  
+                  // Método para subir un documento de un empleado desde admin
+                  uploadDocument: (String id) {
+                  final selectedRow = data.firstWhere((row) => row[idKey] == id);
+                  final name = selectedRow["Nombre"];
+                  final idAdd = selectedRow[idKey];
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return Uploaddocument(
+                        dataChange: name,
+                        idChange: idAdd,
+                      );
+                    },
+                  );
+                },
+                iconUploadDocument: const Icon(Icons.upload_file, color: Colors.black,),
+                tooltipUploadDocument: "Subir Documento",
               );
             }
           },

@@ -23,6 +23,10 @@ class MyPaginatedTable extends StatefulWidget {
   final Function(String id)? onAssign; // Función opcional
   final Icon? iconAssign; // Icono del metodo opcional
   final String? tooltipAssign; // Texto opcional para el tooltip de la acción de asignación.
+    //-----------------------NUEVA FUNCIÓN
+  final Function(String id)? uploadDocument; // Función opcional para cargar documentos
+  final Icon? iconUploadDocument; //Icono para la función opcional de cargar documentos
+  final String? tooltipUploadDocument; // Texto opcional
 
   const MyPaginatedTable({
     super.key,
@@ -37,6 +41,9 @@ class MyPaginatedTable extends StatefulWidget {
     required this.activateFunction,
     this.iconAssign,
     this.tooltipAssign,
+    this.uploadDocument,
+    this.iconUploadDocument,
+    this.tooltipUploadDocument
   });
 
   @override
@@ -85,6 +92,9 @@ class _MyPaginatedTableState extends State<MyPaginatedTable> {
                 onAssign: widget.onAssign,
                 iconAssign: widget.iconAssign,
                 tooltipAssign: widget.tooltipAssign,
+                uploadDocument: widget.uploadDocument,
+                iconUploadDocument: widget.iconUploadDocument,
+                tooltipUploadDocument: widget.tooltipUploadDocument
               ),
               rowsPerPage: _rowsPerPage, // Número de filas por pagina.
               availableRowsPerPage: const [5, 15, 20, 30], // Valores para cambiar el numero de registros por pagina.
@@ -118,6 +128,10 @@ class _TableDataSource extends DataTableSource {
   final Function(String id)? onAssign; // Función opcional
   final Icon? iconAssign; // Icono del metodo opcional
   final String? tooltipAssign; // Texto opcional para el tooltip de la acción de asignación.
+    //--------------NUEVA FUNCIÓN
+  final Function(String id)? uploadDocument; // Función opcional para cargar documentos
+  final Icon? iconUploadDocument; //Icono para la función opcional de cargar documentos
+  final String? tooltipUploadDocument; // Texto opcional
 
   // Constructor para inicializar la fuente de datos.
   _TableDataSource({
@@ -131,6 +145,9 @@ class _TableDataSource extends DataTableSource {
     this.onAssign,
     this.iconAssign,
     this.tooltipAssign,
+    this.uploadDocument,
+    this.iconUploadDocument,
+    this.tooltipUploadDocument
   });
 
   // Configuración de filas y datos de celda para un DataTable.
@@ -202,12 +219,18 @@ class _TableDataSource extends DataTableSource {
                     }
                   }
                 },),
-              // Botón opcional para asignar, solo se muestra si se proporciona la función.
+              // Botón opcional para asignar clave del empleado, solo se muestra si se proporciona la función.
               if (onAssign != null)
                 InkComponent(
                     tooltip: tooltipAssign!,
                     iconInk: iconAssign ?? const Icon(Icons.assignment),
                     inkFunction: () => onAssign!(rowData[idKey].toString())),
+                              if (uploadDocument != null)
+                // Botón para subir un documento de empleado seleccionado.
+                InkComponent(
+                    tooltip: tooltipUploadDocument!,
+                    iconInk: iconUploadDocument ?? const Icon(Icons.assignment),
+                    inkFunction: () => uploadDocument!(rowData[idKey].toString())),
             ],
           ),
         ),

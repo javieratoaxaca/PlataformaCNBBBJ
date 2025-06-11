@@ -6,18 +6,15 @@ import 'dart:html' as html;
 Future<void> generarExcelCursosCompletados() async {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  // Obtener documentos de CursosCompletados
   QuerySnapshot cursosCompletadosSnapshot =
       await firestore.collection('CursosCompletados').get();
 
-  // Crear una instancia de Excel
   var excel = Excel.createExcel();
   Sheet sheetObject = excel['Cursos Completados'];
 
-  // Mapeo de dependencias únicas
   Set<String> dependenciasSet = {};
 
-  // Obtener todas las dependencias disponibles en los cursos
+  // Recoger todas las dependencias únicas
   for (var doc in cursosCompletadosSnapshot.docs) {
     List<String> idCursos = List<String>.from(doc['IdCursosCompletados']);
 
@@ -32,10 +29,9 @@ Future<void> generarExcelCursosCompletados() async {
     }
   }
 
-  // Convertimos el Set en una lista y la ordenamos alfabéticamente
   List<String> dependenciasOrdenadas = dependenciasSet.toList()..sort();
 
-  // Crear encabezados principales (CUPO, Nombre del Empleado y Dependencias)
+  // Encabezados principales
   List<CellValue?> encabezadoDependencias = [
     TextCellValue('CUPO'),
     TextCellValue('Nombre del Empleado')
@@ -45,20 +41,18 @@ Future<void> generarExcelCursosCompletados() async {
     encabezadoDependencias.add(TextCellValue(''));
     encabezadoDependencias.add(TextCellValue(''));
   }
-
   sheetObject.appendRow(encabezadoDependencias);
 
-  // Crear subencabezados (Curso, Trimestre, Fecha Completado)
-  List<CellValue?> subEncabezados = [TextCellValue(''), TextCellValue('')]; // Primeras dos columnas vacías
+  // Subencabezados
+  List<CellValue?> subEncabezados = [TextCellValue(''), TextCellValue('')];
   for (String dependencia in dependenciasOrdenadas) {
     subEncabezados.add(TextCellValue('Curso'));
     subEncabezados.add(TextCellValue('Trimestre'));
     subEncabezados.add(TextCellValue('Fecha Completado'));
   }
-
   sheetObject.appendRow(subEncabezados);
 
-  // Recorrer los documentos de CursosCompletados
+  // Procesar cada empleado
   for (var doc in cursosCompletadosSnapshot.docs) {
     String uid = doc['uid'];
     List<String> idCursos = List<String>.from(doc['IdCursosCompletados']);
@@ -66,12 +60,10 @@ Future<void> generarExcelCursosCompletados() async {
         .map((fecha) => (fecha as Timestamp).toDate().toIso8601String())
         .toList();
 
-    // Obtener datos del usuario (User) relacionado con el uid
     DocumentSnapshot userSnapshot =
         await firestore.collection('User').doc(uid).get();
     String cupon = userSnapshot['CUPO'] ?? 'S/D';
 
-    // Obtener el nombre del empleado usando el CUPO de la colección 'User'
     String empleadoNombre = 'Desconocido';
     if (cupon.isNotEmpty) {
       QuerySnapshot empleadosSnapshot = await firestore
@@ -84,21 +76,9 @@ Future<void> generarExcelCursosCompletados() async {
       }
     }
 
-    // Inicializamos la fila con el CUPO y el nombre del empleado
-    List<CellValue?> fila = [TextCellValue(cupon), TextCellValue(empleadoNombre)];
+    // Mapa para organizar los cursos por dependencia
+    Map<String, List<List<String>>> datosPorDependencia = {};
 
-    // Mapeamos las dependencias a listas vacías para cursos, trimestres y fechas
-    Map<String, List<String>> cursosPorDependencia = {};
-    Map<String, List<String>> trimestresPorDependencia = {};
-    Map<String, List<String>> fechasPorDependencia = {};
-
-    for (String dependencia in dependenciasOrdenadas) {
-      cursosPorDependencia[dependencia] = [];
-      trimestresPorDependencia[dependencia] = [];
-      fechasPorDependencia[dependencia] = [];
-    }
-
-    // Recorrer los cursos completados por el usuario
     for (int i = 0; i < idCursos.length; i++) {
       String cursoId = idCursos[i];
       String fechaCurso = fechasCursos[i];
@@ -109,31 +89,63 @@ Future<void> generarExcelCursosCompletados() async {
       if (cursoSnapshot.exists) {
         String nombreCurso = cursoSnapshot['NombreCurso'] ?? 'Desconocido';
         String trimestre = cursoSnapshot['Trimestre'] ?? '0';
-        String dependencia = cursoSnapshot['Dependencia'] ?? 'S/D';
+        String dependenciaCurso = cursoSnapshot['Dependencia'] ?? 'S/D';
 
-        // Agregar los datos en la dependencia correspondiente
-        if (cursosPorDependencia.containsKey(dependencia)) {
-          cursosPorDependencia[dependencia]!.add(nombreCurso);
-          trimestresPorDependencia[dependencia]!.add(trimestre);
-          fechasPorDependencia[dependencia]!.add(fechaCurso);
+        if (!datosPorDependencia.containsKey(dependenciaCurso)) {
+          datosPorDependencia[dependenciaCurso] = [];
         }
+        datosPorDependencia[dependenciaCurso]!.add([
+          nombreCurso,
+          trimestre,
+          fechaCurso.split("T")[0]
+        ]);
       }
     }
 
-    // Llenamos la fila con los datos organizados por dependencia
-    for (String dependencia in dependenciasOrdenadas) {
-      fila.add(TextCellValue(cursosPorDependencia[dependencia]!.isNotEmpty ? cursosPorDependencia[dependencia]![0] : ''));
-      fila.add(TextCellValue(trimestresPorDependencia[dependencia]!.isNotEmpty ? trimestresPorDependencia[dependencia]![0] : ''));
-      fila.add(TextCellValue(fechasPorDependencia[dependencia]!.isNotEmpty ? fechasPorDependencia[dependencia]![0] : ''));
-    }
+    // Encontrar la cantidad máxima de filas que se necesitarán
+    int maxCursosPorEmpleado = datosPorDependencia.values
+        .map((lista) => lista.length)
+        .fold(0, (prev, curr) => curr > prev ? curr : prev);
 
-    // Agregar la fila al Excel
-    sheetObject.appendRow(fila);
+    // Crear filas dinámicamente según el número de cursos
+    for (int i = 0; i < maxCursosPorEmpleado; i++) {
+      List<CellValue?> fila = [];
+
+      if (i == 0) {
+        // Solo en la primera fila escribimos los datos del empleado
+        fila.add(TextCellValue(cupon));
+        fila.add(TextCellValue(empleadoNombre));
+      } else {
+        // Filas adicionales dejan vacío CUPO y Nombre
+        fila.add(TextCellValue(''));
+        fila.add(TextCellValue(''));
+      }
+
+      // Agregar los cursos en la misma fila
+      for (String dependencia in dependenciasOrdenadas) {
+        if (datosPorDependencia.containsKey(dependencia) &&
+            datosPorDependencia[dependencia]!.length > i) {
+          var datos = datosPorDependencia[dependencia]![i];
+          fila.add(TextCellValue(datos[0])); // Curso
+          fila.add(TextCellValue(datos[1])); // Trimestre
+          fila.add(TextCellValue(datos[2])); // Fecha
+        } else {
+          fila.addAll([
+            TextCellValue(''),
+            TextCellValue(''),
+            TextCellValue('')
+          ]);
+        }
+      }
+
+      sheetObject.appendRow(fila);
+    }
   }
 
-  // Guardar y abrir el archivo
   await guardarYAbrirExcel(excel);
 }
+
+
 
 Future<void> guardarYAbrirExcel(Excel excel) async {
   var bytes = excel.encode();

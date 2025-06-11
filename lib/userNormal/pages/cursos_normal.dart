@@ -48,12 +48,28 @@ class _CursosNormalState extends State<CursosNormal> {
   bool isUploading = false;
   /// Progreso de subida del archivo (de 0.0 a 1.0).
   double uploadProgress = 0.0;
+  // Valor que indica si el curso esta en revisión
+    bool hasPendingFile = false;
 
   /// Inicializa el estado obteniendo el usuario actual.
   @override
   void initState() {
     super.initState();
     user = FirebaseAuth.instance.currentUser;
+    _checkPendingFile(); // Carga la consulta para deshabilitar el curso si esta en revisión.
+  }
+
+    // Método que devuelve un true si es que hay un documento pendiente 'en revisión'.
+    Future<void> _checkPendingFile() async {
+    if (user != null) {
+      bool pending = await _storageService.tieneArchivoPendiente(
+        idCurso: widget.idCurso,
+        uid: user!.uid,
+      );
+      setState(() {
+        hasPendingFile = pending;
+      });
+    }
   }
 
   /// Método que inicia el proceso de selección y subida de un archivo PDF.
@@ -82,6 +98,9 @@ class _CursosNormalState extends State<CursosNormal> {
     setState(() {
       isUploading = false;
     });
+
+    // Después de subir un documento, se vuelve a verificar si hay archivos pendientes
+    await _checkPendingFile();
   }
 
   /// Construye la interfaz visual de la pantalla.
@@ -154,12 +173,9 @@ Widget build(BuildContext context) {
 
           // Botón de subida
           ElevatedButton.icon(
-            onPressed: isUploading ? null : _uploadPDF,
+            onPressed: (isUploading || hasPendingFile) ? null : _uploadPDF, // Deshabilita si está subiendo o el curso esta en estado 'Pendiente'
             icon: const Icon(Icons.upload_file, color: greenColorLight),
-            label: const Text(
-              'Seleccionar y Subir PDF',
-              style: TextStyle(color: greenColorLight),
-            ),
+            label: Text( hasPendingFile ? 'En revisión' : 'Seleccionar y Subir PDF', style: TextStyle(color: greenColorDark),),
           ),
         ],
       ),
