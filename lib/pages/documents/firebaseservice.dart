@@ -252,7 +252,7 @@ class FirebaseService {
 // Captura errores y los reporta con Sentry.
  Future<void> descargarZIP(BuildContext context, String trimestre) async {
   final uri = Uri.parse(
-      "https://us-central1-expedientesems.cloudfunctions.net/generarZipPorTrimestre?trimestre=$trimestre");
+      "https://us-central1-expedientesems.cloudfunctions.net/generarZip?trimestre=$trimestre");
 
   try {
     final response = await http.get(uri);

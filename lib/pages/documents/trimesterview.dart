@@ -173,7 +173,7 @@ class _TrimesterViewState extends State<TrimesterView> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text("Confirmar"),
-        content: Text("Al aceptar, se descargarán y eliminarán los archivos del trimestre $trimestre. \n ¿Continuar?"),
+        content: Text("Al aceptar, se descargarán los archivos del trimestre $trimestre. \n ¿Continuar?"),
         actions:[
           ActionsFormCheck(
             isEditing: true,
@@ -189,13 +189,7 @@ class _TrimesterViewState extends State<TrimesterView> {
               if (!context.mounted) return;
               await _firebaseService.descargarZIP(context, trimestre);
               final archivosExisten = await _firebaseService.verificarArchivosTrimestre(trimestre);
-              if (!context.mounted) return;
-              if (archivosExisten) {
-                await _firebaseService.eliminarArchivosTrimestre(context, trimestre);
-              } else {
-                if (!context.mounted) return;
-                //mostrarDialogo(context, "Sin archivos", "No hay archivos en el trimestre $trimestre para eliminar.");
-              }
+             
             },
           )
         ]
