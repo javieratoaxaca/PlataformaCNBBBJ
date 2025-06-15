@@ -229,9 +229,8 @@ Future<void> assignCupo(
   try {
     // Intentar actualiza la colección
     await DatabaseMethodsEmployee.addEmployeeCupo(
-        idChange, controllerCupo.text);
+        idChange, controllerCupo.text, context);
     if (context.mounted) {
-      showCustomSnackBar(context, 'CUPO Asignado correctamente', greenColorLight);
       Navigator.pop(context);
     }
     refreshTable();

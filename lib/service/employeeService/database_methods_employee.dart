@@ -1,4 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:plataformacnbbbjo/components/formPatrts/custom_snackbar.dart';
+import 'package:plataformacnbbbjo/dataConst/constand.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 
@@ -230,28 +233,78 @@ class DatabaseMethodsEmployee {
 /// cupo (String): La función `addEmployeeCupo` se utiliza para actualizar el campo 'CUPO' para un 
 /// empleado específico en una colección de Firestore llamada 'Empleados'. La función toma dos
 /// parámetros el Id del empleado (employeeId) y el cupo (valor para asignar).
-  static Future<void> addEmployeeCupo(String employeeId, String cupo) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('Empleados')
-          .doc(employeeId)
-          .update({'CUPO': cupo});
-    } on FirebaseException catch (exception, stackTrace) {
-      // Maneja excepciones específicas de Firebase
-      await Sentry.captureException(
-        exception,
-        stackTrace: stackTrace,
-        withScope: (scope) {
-          scope.setTag('firebase_error_code', exception.code);
-        },
-      );
-      rethrow; // Relanzar la excepción
-    } catch (exception, stackTrace) {
-      // Maneja otras excepciones
-      await Sentry.captureException(exception, stackTrace: stackTrace);
-      rethrow;
-    }
+static Future<bool> addEmployeeCupo(
+    String employeeId, String cupo, BuildContext context) async {
+  final firestore = FirebaseFirestore.instance;
+  final trimmedCupo = cupo.trim();
+
+  try {
+    return await firestore.runTransaction<bool>((transaction) async {
+      // 1. Buscar documentos con ese CUPO dentro de la transacción
+      final querySnapshot = await firestore
+          .collection('User')
+          .where('CUPO', isEqualTo: trimmedCupo)
+          .get();
+
+      if (querySnapshot.docs.length > 1) {
+        if (context.mounted) {
+          showCustomSnackBar(
+            context,
+            'Hay más de un usuario con el CUPO "$trimmedCupo". No se realizó la actualización.',
+            Colors.red,
+          );
+        }
+        return false;
+      }
+
+      if (querySnapshot.docs.isEmpty) {
+        if (context.mounted) {
+          showCustomSnackBar(
+            context,
+            'No se encontró ningún usuario con el CUPO "$trimmedCupo". Solo se actualizará el empleado.',
+            Colors.orange,
+          );
+        }
+
+        // Solo actualizar Empleado
+        final empleadoRef = firestore.collection('Empleados').doc(employeeId);
+        transaction.update(empleadoRef, {'CUPO': trimmedCupo});
+        return true;
+      }
+
+      // 2. Hay exactamente un usuario: actualizar ambos documentos
+      final userDoc = querySnapshot.docs.first;
+      final userRef = userDoc.reference;
+      final empleadoRef = firestore.collection('Empleados').doc(employeeId);
+
+      transaction.update(userRef, {'CUPO': trimmedCupo});
+      transaction.update(empleadoRef, {'CUPO': trimmedCupo});
+
+      if (context.mounted) {
+        showCustomSnackBar(
+          context,
+          'CUPO actualizado correctamente',
+          greenColorLight,
+        );
+      }
+
+      return true;
+    });
+  } on FirebaseException catch (exception, stackTrace) {
+    await Sentry.captureException(
+      exception,
+      stackTrace: stackTrace,
+      withScope: (scope) {
+        scope.setTag('operation', 'addEmployeeCupo');
+        scope.setTag('firebase_error_code', exception.code);
+      },
+    );
+    rethrow;
+  } catch (exception, stackTrace) {
+    await Sentry.captureException(exception, stackTrace: stackTrace);
+    rethrow;
   }
+}
 
 /// Obtiene el valor del campo 'CUPO' de un empleado dado su ID.
 ///

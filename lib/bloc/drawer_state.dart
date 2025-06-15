@@ -11,6 +11,7 @@ enum NavItem {
   courseView, //Vista de los cursos
   emailView, //Vista para asignar cursos
   documentView, //Vista de los documentos
+  usersView, //VIsta de los usuarios
   configuration, //Vista de la configuración
   logout //Vista para cerrar sesión
 }

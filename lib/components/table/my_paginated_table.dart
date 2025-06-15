@@ -4,7 +4,6 @@ import 'package:plataformacnbbbjo/dataConst/constand.dart';
 import 'package:plataformacnbbbjo/util/responsive.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
-
 /// El widget `MyPaginatedTable` recibe una lista de encabezados, claves de campos y datos
 /// (en forma de mapas) para renderizar una tabla. Además, permite ejecutar funciones para editar,
 /// eliminar, activar o asignar elementos a partir de un identificador único.
@@ -19,14 +18,16 @@ class MyPaginatedTable extends StatefulWidget {
   /// Estado del botón dinámico: si es verdadero se muestra la acción de eliminar,
   /// si es falso se muestra la acción de activar.
   final bool onActive;
-  final Function(String id) activateFunction; //Función que se ejecuta para activar un registro.
-  final Function(String id)? onAssign; // Función opcional
-  final Icon? iconAssign; // Icono del metodo opcional
+  final Function(String id)? activateFunction; //Función que se ejecuta para activar un registro.
+  final Function(String id)? onAssign; // Función opcional para asignar CUPO
+  final Icon? iconAssign; // Icono del metodo opcional para CUPO
   final String? tooltipAssign; // Texto opcional para el tooltip de la acción de asignación.
-    //-----------------------NUEVA FUNCIÓN
+  //-----------------------NUEVA FUNCIÓN
   final Function(String id)? uploadDocument; // Función opcional para cargar documentos
   final Icon? iconUploadDocument; //Icono para la función opcional de cargar documentos
   final String? tooltipUploadDocument; // Texto opcional
+  //----------------------NUEVA CELDA
+  final Map<String, Widget Function(dynamic)>? customCellsIcon; //Celda que muestra un Icono dependiento de un valor.
 
   const MyPaginatedTable({
     super.key,
@@ -38,12 +39,13 @@ class MyPaginatedTable extends StatefulWidget {
     this.onAssign,
     required this.idKey,
     required this.onActive,
-    required this.activateFunction,
+    this.activateFunction,
     this.iconAssign,
     this.tooltipAssign,
     this.uploadDocument,
     this.iconUploadDocument,
-    this.tooltipUploadDocument
+    this.tooltipUploadDocument, 
+    this.customCellsIcon
   });
 
   @override
@@ -94,10 +96,12 @@ class _MyPaginatedTableState extends State<MyPaginatedTable> {
                 tooltipAssign: widget.tooltipAssign,
                 uploadDocument: widget.uploadDocument,
                 iconUploadDocument: widget.iconUploadDocument,
-                tooltipUploadDocument: widget.tooltipUploadDocument
+                tooltipUploadDocument: widget.tooltipUploadDocument,
+                customCellsIcon: widget.customCellsIcon
+
               ),
               rowsPerPage: _rowsPerPage, // Número de filas por pagina.
-              availableRowsPerPage: const [5, 15, 20, 30], // Valores para cambiar el numero de registros por pagina.
+              availableRowsPerPage: const [5, 10], // Valores para cambiar el numero de registros por pagina.
               onRowsPerPageChanged: (value) {
                 setState(() {
                   if(value != null) {
@@ -111,10 +115,10 @@ class _MyPaginatedTableState extends State<MyPaginatedTable> {
   }
 }
 
-/// Fuente de datos para la tabla paginada.
-///
-/// Esta clase extiende de [DataTableSource] y es responsable de construir cada fila
-/// de la tabla a partir de los datos proporcionados.
+  /// Fuente de datos para la tabla paginada.
+  ///
+  /// Esta clase extiende de [DataTableSource] y es responsable de construir cada fila
+  /// de la tabla a partir de los datos proporcionados.
 class _TableDataSource extends DataTableSource {
   final List<Map<String, dynamic>> data; // Datos a mostrar en la tabla.
   final List<String> fieldKeys; // Lista de claves de los campos que se utilizarán para extraer los valores.
@@ -124,14 +128,16 @@ class _TableDataSource extends DataTableSource {
   /// Estado del botón dinámico: si es verdadero se muestra la acción de eliminar,
   /// si es falso se muestra la acción de activar.
   final bool onActive;
-  final Function(String id) activateFunction; //Función que se ejecuta para activar un registro.
+  final Function(String id)? activateFunction; //Función que se ejecuta para activar un registro.
   final Function(String id)? onAssign; // Función opcional
   final Icon? iconAssign; // Icono del metodo opcional
   final String? tooltipAssign; // Texto opcional para el tooltip de la acción de asignación.
-    //--------------NUEVA FUNCIÓN
+  //--------------NUEVA FUNCIÓN
   final Function(String id)? uploadDocument; // Función opcional para cargar documentos
   final Icon? iconUploadDocument; //Icono para la función opcional de cargar documentos
   final String? tooltipUploadDocument; // Texto opcional
+    //----------------------NUEVA CELDA
+  final Map<String, Widget Function(dynamic)>? customCellsIcon; //Celda que muestra un Icono dependiento de un valor.
 
   // Constructor para inicializar la fuente de datos.
   _TableDataSource({
@@ -147,7 +153,8 @@ class _TableDataSource extends DataTableSource {
     this.tooltipAssign,
     this.uploadDocument,
     this.iconUploadDocument,
-    this.tooltipUploadDocument
+    this.tooltipUploadDocument,
+    this.customCellsIcon
   });
 
   // Configuración de filas y datos de celda para un DataTable.
@@ -173,15 +180,12 @@ class _TableDataSource extends DataTableSource {
           return DataCell(
             SizedBox(
               width: 150, // Ancho estándar para las demás celdas
-              child: Text(
-                rowData[key]?.toString() ?? '',
-                style: const TextStyle(fontSize: 15),
-                overflow: TextOverflow.ellipsis,
-              ),
+//child: Text(rowData[key]?.toString() ?? '',style: const TextStyle(fontSize: 15), overflow: TextOverflow.ellipsis,),
+  child: _buildCell(key, rowData),          
             ),
           );
         }),
-        // Celda de acciones que contiene botones para editar, eliminar/activar y asignar.
+        // Celda de acciones que contiene botones para editar, eliminar/activar,  asignar cupo (opcional) y subir documento (opcional).
         DataCell(
           Row(
             children: [
@@ -191,42 +195,41 @@ class _TableDataSource extends DataTableSource {
                   inkFunction: () => onEdit(rowData[idKey].toString())),
               // Botón para eliminar o activar, dependiendo del estado.
               InkComponent(
-                tooltip: onActive ? "Eliminar" : "Activar",
-                iconInk: Icon(onActive ? Icons.delete_forever_sharp : Icons.power_settings_new,
+                  tooltip: onActive ? "Eliminar" : "Activar",
+                  iconInk: Icon(onActive ? Icons.delete_forever_sharp : Icons.power_settings_new,
                   color: Colors.red,
-                ),
-                inkFunction: () {
-                  // Validaciones para el boton de eliminar/activar, en caso de ocurrir un error
-                  // se registra en Sentry
-                  if (onActive) {
-                    try {
-                      onDelete(rowData[idKey].toString());
-                    } catch (e, stackTrace) {
-                      Sentry.captureException(e, stackTrace: stackTrace,
-                          withScope: (scope) {
-                            scope.setTag('Error_delete_PaginatedTable', rowData[idKey].toString());
-                          });
+                  ),
+                  inkFunction: () {
+                    // Validaciones para el boton de eliminar/activar, en caso de ocurrir un error
+                    // se registra en Sentry
+                    if (onActive) {
+                      try {
+                        onDelete(rowData[idKey].toString());
+                      } catch (e, stackTrace) {
+                        Sentry.captureException(e, stackTrace: stackTrace,
+                        withScope: (scope) {
+                          scope.setTag('Error_delete_PaginatedTable', rowData[idKey].toString());
+                        });
+                      }
+                    } else {
+                      try {
+                        activateFunction!(rowData[idKey].toString());
+                      } catch (e, stackTrace) {
+                        Sentry.captureException(e, stackTrace: stackTrace,
+                        withScope: (scope) {
+                          scope.setTag('Error_activate_PaginatedTable', rowData[idKey].toString());
+                        }
+                        );
+                      }
                     }
-                  } else {
-                    try {
-                      activateFunction(rowData[idKey].toString());
-                    } catch (e, stackTrace) {
-                      Sentry.captureException(e, stackTrace: stackTrace,
-                          withScope: (scope) {
-                            scope.setTag('Error_activate_PaginatedTable', rowData[idKey].toString());
-                          }
-                      );
-                    }
-                  }
-                },),
-              // Botón opcional para asignar clave del empleado, solo se muestra si se proporciona la función.
+                  },),
+              // Botón opcional para asignar, solo se muestra si se proporciona la función.
               if (onAssign != null)
                 InkComponent(
                     tooltip: tooltipAssign!,
                     iconInk: iconAssign ?? const Icon(Icons.assignment),
                     inkFunction: () => onAssign!(rowData[idKey].toString())),
-                              if (uploadDocument != null)
-                // Botón para subir un documento de empleado seleccionado.
+                if (uploadDocument != null)
                 InkComponent(
                     tooltip: tooltipUploadDocument!,
                     iconInk: iconUploadDocument ?? const Icon(Icons.assignment),
@@ -235,6 +238,17 @@ class _TableDataSource extends DataTableSource {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildCell(String key, Map<String, dynamic> rowData) {
+    if (customCellsIcon != null && customCellsIcon!.containsKey(key)) {
+      return customCellsIcon![key]!(rowData[key]);
+    }
+    return Text(
+      rowData[key]?.toString() ?? '',
+      style: const TextStyle(fontSize: 15),
+      overflow: TextOverflow.ellipsis,
     );
   }
 
