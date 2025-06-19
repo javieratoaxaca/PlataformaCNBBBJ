@@ -189,7 +189,7 @@ class _TrimesterViewState extends State<TrimesterView> {
               }
               if (!context.mounted) return;
               await _firebaseService.descargarZIP(context, trimestre);
-              final archivosExisten = await _firebaseService.verificarArchivosTrimestre(trimestre);
+            
              
             },
           )

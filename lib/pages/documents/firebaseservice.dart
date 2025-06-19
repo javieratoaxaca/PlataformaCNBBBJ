@@ -295,41 +295,6 @@ class FirebaseService {
 }
 
 
-// Elimina todos los archivos almacenados en Firebase Storage de un trimestre mediante una función en la nube.
-// [context] Contexto de la interfaz para mostrar diálogos.
-// [trimestre] Trimestre seleccionado.
-// Muestra mensajes de éxito o error según el estado de la operación.
-// Captura errores y los reporta con Sentry.
-Future<void> eliminarArchivosTrimestre(BuildContext context, String trimestre) async {
-  final uri = Uri.parse(
-      "https://us-central1-expedientesems.cloudfunctions.net/eliminarArchivosPorTrimestre?trimestre=$trimestre");
-
-  try {
-    final response = await http.get(uri);
-
-    if (response.statusCode == 200) {
-      if (!context.mounted) return;
-      mostrarDialogo(context, "Eliminación completa", "Se han eliminado los archivos del trimestre $trimestre.");
-    } else if (response.statusCode == 404) {
-      if (!context.mounted) return;
-      mostrarDialogo(context, "Sin archivos", "No hay archivos en el trimestre $trimestre para eliminar.");
-    } else {
-      if (!context.mounted) return;
-      mostrarDialogo(context, "Error en eliminación", "Código de error: ${response.statusCode}");
-    }
-  } catch (exception, stackTrace) {
-    if (!context.mounted) return;
-    mostrarDialogo(context, "Error inesperado", "No se pudieron eliminar los archivos.");
-    await Sentry.captureException(
-      exception,
-      stackTrace: stackTrace,
-      withScope: (scope) {
-        scope.setTag("firebase_function", "generarZipDocumentos");
-        scope.setContexts("uri", uri.toString());
-      },
-    );
-  }
-}
 
 // Muestra un cuadro de diálogo personalizado con título y mensaje en la interfaz.
 // [context] Contexto donde se mostrará el diálogo.
@@ -352,23 +317,6 @@ void mostrarDialogo(BuildContext context, String titulo, String mensaje) {
   );
 }
 
-// Verifica si existen archivos almacenados en Firebase Storage para un trimestre.
-// [trimestre] Trimestre a consultar.
-// Retorna `true` si existen archivos, `false` en caso contrario.
-Future<bool> verificarArchivosTrimestre(String trimestre) async {
-  final uri = Uri.parse(
-      "https://us-central1-expedientesems.cloudfunctions.net/eliminarArchivosPorTrimestre?trimestre=$trimestre");
-
-  try {
-    final response = await http.get(uri);
-    if (response.statusCode == 404) {
-      return false; // No hay archivos
-    }
-    return true; // Sí hay archivos
-  } catch (e) {
-    return false; // Error en la solicitud, asumimos que no hay archivos
-  }
-}
 
 // Descarga un archivo Excel con información de los cursos desde una función en la nube.
 // [context] Contexto para mostrar diálogos informativos.
